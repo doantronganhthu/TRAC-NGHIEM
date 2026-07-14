@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "HistoryRecord": {
+      "title": "HistoryRecord",
+      "description": "Lịch sử nộp bài của học viên",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Tên học viên"
+        },
+        "examTitle": {
+          "type": "string",
+          "description": "Tên của kỳ thi"
+        },
+        "time": {
+          "type": "string",
+          "description": "Thời gian nộp bài dưới dạng hh:mm:ss"
+        },
+        "score": {
+          "type": "string",
+          "description": "Điểm số đạt được (vd: 45/50)"
+        },
+        "duration": {
+          "type": "integer",
+          "description": "Thời gian làm bài của học viên tính bằng giây"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Thời gian lưu trữ trong Firestore"
+        }
+      },
+      "required": ["name", "examTitle", "time", "score", "createdAt"]
+    },
+    "Exam": {
+      "title": "Exam",
+      "description": "Đề thi được tạo hoặc lưu trữ",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID định danh của đề thi"
+        },
+        "title": {
+          "type": "string",
+          "description": "Tên kỳ thi"
+        },
+        "creator": {
+          "type": "string",
+          "description": "Người tạo kỳ thi"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Ngày giờ tạo"
+        },
+        "isHidden": {
+          "type": "boolean",
+          "description": "Kỳ thi bị ẩn hay không"
+        },
+        "questions": {
+          "type": "array",
+          "description": "Danh sách các câu hỏi trong đề thi"
+        }
+      },
+      "required": ["id", "title", "questions"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Các thiết lập cấu hình của ứng dụng",
+      "type": "object",
+      "properties": {
+        "order": {
+          "type": "array",
+          "description": "Thứ tự sắp xếp các kỳ thi"
+        }
+      },
+      "required": ["order"]
+    }
+  },
+  "firestore": {
+    "history/{historyId}": {
+      "schema": "HistoryRecord",
+      "description": "Tập hợp các lượt nộp bài của học viên"
+    },
+    "exams/{examId}": {
+      "schema": "Exam",
+      "description": "Tập hợp các kỳ thi"
+    },
+    "settings/{settingId}": {
+      "schema": "Settings",
+      "description": "Các cài đặt hoặc thiết lập cấu hình của ứng dụng như thứ tự kỳ thi"
+    }
+  }
+}

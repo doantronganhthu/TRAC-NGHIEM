@@ -1,0 +1,6 @@
+{
+  "name": "Trắc Nghiệm Quy Trình Hệ Thống Điện",
+  "description": "Ứng dụng luyện thi trắc nghiệm quy trình vận hành hệ thống điện với bộ câu hỏi ngẫu nhiên và đáp án xáo trộn.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

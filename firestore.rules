@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+
+    function isValidHistory(data) {
+      return data.keys().hasAll(['name', 'examTitle', 'time', 'score', 'createdAt'])
+        && data.keys().size() >= 5 && data.keys().size() <= 6
+        && data.name is string && data.name.size() <= 200
+        && data.examTitle is string && data.examTitle.size() <= 300
+        && data.time is string && data.time.size() <= 50
+        && data.score is string && data.score.size() <= 50
+        && (!data.keys().hasAny(['duration']) || data.duration is int);
+    }
+
+    function isValidExam(data) {
+      return data.keys().hasAll(['id', 'title', 'creator', 'createdAt', 'questions'])
+        && data.id is string && data.id.size() <= 128
+        && data.title is string && data.title.size() <= 300
+        && data.creator is string && data.creator.size() <= 200
+        && data.questions is list;
+    }
+
+    function isValidSettings(data) {
+      return data.keys().hasAll(['order'])
+        && data.keys().size() == 1
+        && data.order is list;
+    }
+
+    // History collection
+    match /history/{historyId} {
+      allow read: if true;
+      allow create: if isValidHistory(request.resource.data);
+      allow update: if false;
+      allow delete: if true;
+    }
+
+    // Settings collection for configurations
+    match /settings/{settingId} {
+      allow read: if true;
+      allow create, update: if isValidSettings(request.resource.data);
+      allow delete: if false;
+    }
+
+    // Exams collection for customizable exams
+    match /exams/{examId} {
+      allow read: if true;
+      allow create, update: if isValidExam(request.resource.data);
+      allow delete: if true;
+    }
+
+    // Test connection check
+    match /test_initial_connection_status_check/{docId} {
+      allow read, write: if true;
+    }
+  }
+}
