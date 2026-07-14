@@ -10,6 +10,7 @@ interface QuizCardProps {
   selectedAnswer: 'A' | 'B' | 'C' | 'D' | null;
   onSelectAnswer: (key: 'A' | 'B' | 'C' | 'D') => void;
   mode: QuizMode;
+  isDarkMode?: boolean;
 }
 
 export const QuizCard: React.FC<QuizCardProps> = ({
@@ -19,6 +20,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
   selectedAnswer,
   onSelectAnswer,
   mode,
+  isDarkMode = false,
 }) => {
   // If we are in practice mode and the user has answered, reveal the correctness
   const isAnswered = selectedAnswer !== null;
@@ -26,17 +28,17 @@ export const QuizCard: React.FC<QuizCardProps> = ({
   return (
     <div id="quiz-card-container" className="flex flex-col gap-4 w-full">
       {/* Header Info */}
-      <div id="quiz-card-header" className="flex items-center justify-between border-b border-slate-100 pb-3">
+      <div id="quiz-card-header" className={`flex items-center justify-between border-b pb-3 ${isDarkMode ? 'border-white/10' : 'border-slate-100'}`}>
         <div className="flex items-center gap-2">
           <span className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full ${
             mode === 'exam' 
-              ? 'bg-indigo-50 text-indigo-700' 
-              : 'bg-emerald-50 text-emerald-700'
+              ? isDarkMode ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-indigo-50 text-indigo-700' 
+              : isDarkMode ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-emerald-50 text-emerald-700'
           }`}>
             {mode === 'exam' ? 'Thi thử' : 'Luyện tập'}
           </span>
         </div>
-        <span className="text-xs uppercase tracking-widest text-slate-400 font-bold font-mono">
+        <span className={`text-xs uppercase tracking-widest font-bold font-mono ${isDarkMode ? 'text-slate-400' : 'text-slate-400'}`}>
           Câu {currentIndex + 1} / {totalQuestions}
         </span>
       </div>
@@ -44,10 +46,14 @@ export const QuizCard: React.FC<QuizCardProps> = ({
       {/* Question Content */}
       <div id="quiz-question-wrapper" className="space-y-2">
         <div className="flex gap-3 items-start">
-          <span className="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full text-[10px] font-extrabold shrink-0 mt-0.5 font-mono">
+          <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold shrink-0 mt-0.5 font-mono ${
+            isDarkMode ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/35' : 'bg-indigo-50 text-indigo-700'
+          }`}>
             CÂU {currentIndex + 1}
           </span>
-          <h2 id="quiz-question-text" className="text-base sm:text-lg font-semibold leading-relaxed text-slate-850 font-sans">
+          <h2 id="quiz-question-text" className={`text-base sm:text-lg font-semibold leading-relaxed font-sans ${
+            isDarkMode ? 'text-slate-100' : 'text-slate-850'
+          }`}>
             {question.question}
           </h2>
         </div>
@@ -68,25 +74,50 @@ export const QuizCard: React.FC<QuizCardProps> = ({
             // practice mode with answer revealed
             if (isCorrect) {
               // This is the correct option
-              buttonClass += "border-emerald-500 bg-emerald-50/40 text-emerald-950 shadow-xs ";
-              labelClass += "bg-emerald-500 text-white border-emerald-500 ";
+              if (isDarkMode) {
+                buttonClass += "border-emerald-500 bg-emerald-500/10 text-emerald-250 shadow-xs ";
+                labelClass += "bg-emerald-500 text-white border-emerald-500 ";
+              } else {
+                buttonClass += "border-emerald-500 bg-emerald-50/40 text-emerald-950 shadow-xs ";
+                labelClass += "bg-emerald-500 text-white border-emerald-500 ";
+              }
             } else if (isSelected) {
               // User selected this and it's incorrect
-              buttonClass += "border-rose-400 bg-rose-50/40 text-rose-950 ";
-              labelClass += "bg-rose-500 text-white border-rose-500 ";
+              if (isDarkMode) {
+                buttonClass += "border-rose-500 bg-rose-500/15 text-rose-250 ";
+                labelClass += "bg-rose-500 text-white border-rose-500 ";
+              } else {
+                buttonClass += "border-rose-400 bg-rose-50/40 text-rose-950 ";
+                labelClass += "bg-rose-500 text-white border-rose-500 ";
+              }
             } else {
               // Unselected and incorrect options
-              buttonClass += "border-slate-100 bg-slate-50/20 text-slate-400 opacity-50 cursor-not-allowed ";
-              labelClass += "bg-slate-100 text-slate-450 border-slate-200 ";
+              if (isDarkMode) {
+                buttonClass += "border-white/5 bg-white/[0.01] text-slate-500 opacity-40 cursor-not-allowed ";
+                labelClass += "bg-white/5 text-slate-500 border-white/10 ";
+              } else {
+                buttonClass += "border-slate-100 bg-slate-50/20 text-slate-400 opacity-50 cursor-not-allowed ";
+                labelClass += "bg-slate-100 text-slate-450 border-slate-200 ";
+              }
             }
           } else {
             // Exam mode or practice mode before answering
             if (isSelected) {
-              buttonClass += "border-indigo-600 bg-white text-slate-900 shadow-md ring-4 ring-indigo-50 ";
-              labelClass += "bg-indigo-600 text-white border-indigo-600 ";
+              if (isDarkMode) {
+                buttonClass += "border-indigo-500 bg-indigo-500/10 text-indigo-100 shadow-[0_0_15px_rgba(99,102,241,0.3)] ring-4 ring-indigo-500/20 ";
+                labelClass += "bg-indigo-500 text-white border-indigo-500 ";
+              } else {
+                buttonClass += "border-indigo-700 bg-indigo-50/30 text-indigo-950 shadow-sm ring-4 ring-indigo-100/50 ";
+                labelClass += "bg-indigo-700 text-white border-indigo-700 ";
+              }
             } else {
-              buttonClass += "border-slate-100 bg-slate-50/50 hover:border-indigo-600 hover:bg-white text-slate-700 ";
-              labelClass += "bg-white border-slate-200 text-slate-650 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600 ";
+              if (isDarkMode) {
+                buttonClass += "border-white/10 bg-white/[0.03] hover:border-indigo-400 hover:bg-white/[0.07] text-slate-300 ";
+                labelClass += "bg-white/5 border-white/15 text-slate-300 group-hover:bg-indigo-500 group-hover:text-white group-hover:border-indigo-500 ";
+              } else {
+                buttonClass += "border-slate-200 bg-slate-50/40 hover:border-indigo-500 hover:bg-indigo-50/15 text-slate-700 ";
+                labelClass += "bg-slate-100 border-slate-300 text-slate-600 group-hover:bg-indigo-700 group-hover:text-white group-hover:border-indigo-700 ";
+              }
             }
           }
 
@@ -108,7 +139,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
               <span className={labelClass}>
                 {optionLetter}
               </span>
-              <span className="flex-1 text-slate-700 font-normal pr-2">{text}</span>
+              <span className={`flex-1 font-normal pr-2 ${isDarkMode ? 'text-slate-200' : 'text-slate-750'}`}>{text}</span>
 
               {/* Status Icons for practice mode */}
               {mode === 'practice' && isAnswered && (

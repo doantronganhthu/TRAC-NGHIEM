@@ -33,7 +33,9 @@ import {
   EyeOff,
   ChevronDown,
   GripVertical,
-  Download
+  Download,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -201,6 +203,7 @@ export default function App() {
     }
   });
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   // Creation Modals & Inputs
@@ -1011,15 +1014,55 @@ export default function App() {
   // Score count during quiz
   const answeredCount = Object.keys(userAnswers).length;
 
+  const containerStyle = isDarkMode ? {
+    background: `radial-gradient(circle at 20% 10%, rgba(97,218,251,.15), transparent 28%),
+                 radial-gradient(circle at 80% 40%, rgba(120,255,180,.08), transparent 24%),
+                 radial-gradient(circle at 50% 100%, rgba(97,218,251,.08), transparent 35%),
+                 #05070b`,
+    color: 'white'
+  } : {
+    backgroundColor: '#f1f5f9',
+    color: '#1e293b'
+  };
+
   return (
-    <div id="quiz-root-wrapper" className="min-h-screen bg-[#edf4f2] text-slate-900 flex flex-col font-sans">
+    <div 
+      id="quiz-root-wrapper" 
+      className={`min-h-screen flex flex-col font-sans relative overflow-x-hidden transition-all duration-300 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}
+      style={containerStyle}
+    >
+      {isDarkMode && (
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+          <div className="absolute -top-32 left-[10%] h-[30rem] w-[30rem] rounded-full bg-[radial-gradient(circle,rgba(97,218,251,.18),transparent_70%)] blur-3xl"></div>
+          <div className="absolute bottom-0 right-[5%] h-[32rem] w-[32rem] rounded-full bg-[radial-gradient(circle,rgba(120,255,180,.1),transparent_70%)] blur-3xl"></div>
+          <div 
+            className="absolute inset-0 opacity-[0.25]"
+            style={{
+              backgroundImage: `linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px)`,
+              backgroundSize: '110px 110px',
+              maskImage: 'radial-gradient(circle at center, black 30%, transparent 78%)',
+              WebkitMaskImage: 'radial-gradient(circle at center, black 30%, transparent 78%)'
+            }}
+          />
+        </div>
+      )}
       
       {/* Upper Navigation Bar */}
-      <header id="app-global-header" className="bg-white border-b border-slate-100 sticky top-0 z-40 shrink-0 shadow-xs h-16 flex items-center">
+      <header 
+        id="app-global-header" 
+        className={`sticky top-0 z-40 shrink-0 h-16 flex items-center transition-all duration-300 border-b ${
+          isDarkMode 
+            ? 'bg-[#05070b]/85 border-white/10 backdrop-blur-xl shadow-lg' 
+            : 'bg-white border-slate-100 shadow-xs'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between">
           <div className="flex items-center gap-3">
             {!logo2Error ? (
-              <div className="w-8 h-8 rounded-lg overflow-hidden border border-slate-150 shadow-xs flex items-center justify-center bg-slate-50">
+              <div className={`w-8 h-8 rounded-lg overflow-hidden border shadow-xs flex items-center justify-center bg-slate-50 transition-colors duration-300 ${
+                isDarkMode ? 'border-white/10 bg-white/5' : 'border-slate-150 bg-slate-50'
+              }`}>
                 <img
                   src={logo2Img}
                   alt="Logo 2"
@@ -1033,25 +1076,55 @@ export default function App() {
                 E
               </div>
             )}
-            <div className="flex flex-col justify-center">
-              <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider leading-tight">
+            <div className="flex flex-col items-center justify-center text-center font-serif">
+              <p className={`text-[11px] sm:text-[13px] font-normal uppercase tracking-normal leading-tight transition-colors duration-300 ${
+                isDarkMode ? 'text-slate-300' : 'text-slate-800'
+              }`}>
                 CÔNG TY ĐIỆN LỰC AN GIANG
               </p>
-              <p className="text-xs sm:text-sm font-extrabold text-indigo-950 uppercase tracking-wider leading-tight mt-0.5">
+              <p className={`text-xs sm:text-sm font-bold uppercase tracking-normal leading-tight mt-0.5 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-slate-900'
+              }`}>
                 PHÒNG ĐIỀU ĐỘ
               </p>
+              <div className={`w-12 border-b mt-1 transition-colors duration-300 ${
+                isDarkMode ? 'border-indigo-400' : 'border-slate-950'
+              }`}></div>
             </div>
           </div>
 
           <div className="flex items-center gap-6">
+            {/* Dark/Light mode Toggle Switch */}
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-sm border ${
+                isDarkMode 
+                  ? 'bg-white/[0.06] hover:bg-white/[0.12] text-amber-400 border-white/10 hover:border-white/20' 
+                  : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-150'
+              }`}
+              title={isDarkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
+            >
+              {isDarkMode ? (
+                <>
+                  <Moon className="w-3.5 h-3.5 fill-current text-indigo-350" />
+                  <span>DARK</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="w-3.5 h-3.5 fill-current text-amber-500" />
+                  <span>LIGHT</span>
+                </>
+              )}
+            </button>
+
             {phase === 'quiz' && (
               <>
                 {/* Progress bar in navbar */}
                 <div className="hidden md:flex flex-col items-end">
                   <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Tiến độ hoàn thành</span>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-slate-600">Câu hỏi {currentIndex + 1} / {examQuestions.length}</span>
-                    <div className="w-40 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <span className={`text-xs font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Câu hỏi {currentIndex + 1} / {examQuestions.length}</span>
+                    <div className={`w-40 h-1.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-white/10' : 'bg-slate-100'}`}>
                       <div 
                         className="bg-indigo-600 h-full transition-all duration-300" 
                         style={{ width: `${((currentIndex + 1) / examQuestions.length) * 100}%` }}
@@ -1060,12 +1133,12 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="h-8 w-px bg-slate-250 mx-1 hidden md:block"></div>
+                <div className={`h-8 w-px mx-1 hidden md:block ${isDarkMode ? 'bg-white/10' : 'bg-slate-250'}`}></div>
 
                 {/* Timer Clock display */}
                 <div id="exam-dashboard-timer" className="flex flex-col items-end">
                   <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Thời gian làm bài</span>
-                  <span className="text-lg font-mono font-bold text-slate-700 leading-tight">
+                  <span className={`text-lg font-mono font-bold leading-tight ${isDarkMode ? 'text-white' : 'text-slate-700'}`}>
                     {formatTimerLabel(timeSpent)}
                   </span>
                 </div>
@@ -1073,7 +1146,11 @@ export default function App() {
                 {/* Mobile sidebar toggle button */}
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="lg:hidden p-2 rounded-xl hover:bg-slate-50 border border-slate-200 text-slate-600"
+                  className={`lg:hidden p-2 rounded-xl border transition-colors duration-150 ${
+                    isDarkMode 
+                      ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' 
+                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                  }`}
                 >
                   <Menu className="w-5 h-5" />
                 </button>
@@ -1083,7 +1160,11 @@ export default function App() {
 
 
             {userName && (
-              <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-full text-xs font-bold text-indigo-700 shadow-xs">
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold shadow-xs border transition-colors ${
+                isDarkMode 
+                  ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-300' 
+                  : 'bg-indigo-50 border-indigo-100 text-indigo-700'
+              }`}>
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></div>
                 <span className="truncate max-w-[120px]">{(userName === 'Admin-AMT' || userName === 'TPĐĐ') ? '\u00A0' : userName}</span>
                 {userName === 'Admin-AMT' && (
@@ -1094,7 +1175,9 @@ export default function App() {
                     setUserName('');
                     setNameSubmitted(false);
                   }}
-                  className="p-1 hover:bg-slate-200/50 rounded-full text-slate-400 hover:text-rose-600 transition cursor-pointer"
+                  className={`p-1 rounded-full transition cursor-pointer ${
+                    isDarkMode ? 'hover:bg-white/10 text-slate-400 hover:text-rose-400' : 'hover:bg-slate-200/50 text-slate-400 hover:text-rose-600'
+                  }`}
                   title="Đổi tên đăng nhập"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -1106,49 +1189,67 @@ export default function App() {
       </header>
 
       {/* Main Content Arena */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col justify-start">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 flex flex-col justify-start">
         <AnimatePresence mode="wait">
           
           {/* Phase 1: Welcome & Intro configuration panel */}
           {phase === 'intro' && (
-            <div className="w-full flex flex-col items-center gap-8">
+            <div className={`w-full flex flex-col items-center ${!nameSubmitted ? 'pt-4 sm:pt-6 md:pt-8 lg:pt-12 pb-6 gap-6' : 'gap-8'}`}>
               <motion.div
                 key="intro-screen"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
                 id="intro-container"
-                className="max-w-3xl mx-auto w-full space-y-8"
+                className={`max-w-3xl mx-auto w-full ${!nameSubmitted ? 'space-y-6' : 'space-y-8'}`}
               >
               {/* Premium Title Section */}
-              <div className="text-center space-y-3 py-4 px-2">
-                <span className="text-xs sm:text-sm font-extrabold text-slate-500 uppercase tracking-widest block">
-                  Chương trình trắc nghiệm dành cho
+              <div className="text-center space-y-2 py-2 px-2">
+                <span className={`text-base min-[380px]:text-lg sm:text-xl font-extrabold uppercase tracking-widest block leading-normal transition-colors duration-300 ${
+                  isDarkMode ? 'text-slate-400' : 'text-slate-500'
+                }`}>
+                  CHƯƠNG TRÌNH
                 </span>
-                <h1 className="text-xl min-[380px]:text-2xl sm:text-3xl md:text-4xl font-extrabold text-indigo-600 tracking-tight leading-none max-w-full mx-auto drop-shadow-xs whitespace-nowrap overflow-hidden text-ellipsis">
-                  Điều độ viên và Trưởng kíp TTĐK
+                <h1 className={`text-lg min-[380px]:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight leading-normal max-w-full mx-auto py-1 transition-all duration-300 ${
+                  isDarkMode ? 'text-indigo-400 drop-shadow-[0_0_15px_rgba(129,140,248,0.25)]' : 'text-indigo-600 drop-shadow-xs'
+                }`}>
+                  ÔN LUYỆN TRẮC NGHIỆM
                 </h1>
               </div>
 
               {!nameSubmitted ? (
                 /* Name collection view */
-                <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 max-w-md mx-auto space-y-3 text-center">
+                <div className={`rounded-3xl p-5 sm:p-6 space-y-4 text-center transition-all duration-300 ${
+                  isDarkMode 
+                    ? 'bg-[#0f172a]/65 border border-white/10 backdrop-blur-xl shadow-2xl' 
+                    : 'bg-white shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100'
+                } max-w-md mx-auto`}>
                   <div>
-                    <h3 className="text-base sm:text-lg font-extrabold text-slate-800 tracking-wide uppercase">Nhập tên thí sinh</h3>
+                    <h3 className={`text-base sm:text-lg font-extrabold tracking-wide uppercase transition-colors duration-300 ${
+                      isDarkMode ? 'text-slate-200' : 'text-slate-800'
+                    }`}>Nhập tên thí sinh</h3>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <input
                       type="text"
                       value={tempName}
                       onChange={(e) => setTempName(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') handleNameSubmit(); }}
                       placeholder="Nhập tên của bạn (Ví dụ: Nguyễn Văn A)"
-                      className="w-full px-4 py-4 bg-slate-50 border-2 border-indigo-400 hover:border-indigo-500 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 rounded-2xl text-base font-bold transition-all text-center focus:outline-none shadow-sm placeholder:text-slate-400 placeholder:font-medium"
+                      className={`w-full px-4 py-4 rounded-2xl text-base font-bold transition-all text-center focus:outline-none shadow-sm placeholder:font-medium ${
+                        isDarkMode 
+                          ? 'bg-white/5 border-2 border-indigo-500/50 hover:border-indigo-400 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/20 text-white placeholder:text-slate-500' 
+                          : 'bg-slate-50 border-2 border-indigo-400 hover:border-indigo-500 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-100 text-slate-900 placeholder:text-slate-400'
+                      }`}
                       autoFocus
                     />
                     <button
                       onClick={handleNameSubmit}
-                      className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-2 text-sm"
+                      className={`w-full py-3.5 font-bold rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-2 text-sm ${
+                        isDarkMode 
+                          ? 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]' 
+                          : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                      }`}
                     >
                       <Play className="w-4 h-4 fill-current animate-pulse" />
                       VÀO ÔN LUYỆN
@@ -1158,13 +1259,23 @@ export default function App() {
               ) : (
                 /* Normal configurations widget after name supplied */
                 <>
-                  <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 space-y-8">
+                  <div className={`rounded-3xl p-4 sm:p-6 md:p-8 space-y-4 md:space-y-6 transition-all duration-300 ${
+                    isDarkMode 
+                      ? 'bg-[#0f172a]/45 border border-white/10 backdrop-blur-xl shadow-2xl text-white' 
+                      : 'bg-white border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)]'
+                  }`}>
                     
                     {/* Header with Selector & Admin plus */}
-                    <div className="border-b border-slate-100 pb-4 space-y-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                          <Layers className="w-5 h-5 text-indigo-600" />
+                    <div className={`border-b pb-2.5 space-y-2 transition-colors duration-300 ${
+                      isDarkMode ? 'border-white/10' : 'border-slate-100'
+                    }`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <h3 className={`text-base font-bold flex items-center gap-1.5 transition-colors duration-300 ${
+                          isDarkMode ? 'text-slate-100' : 'text-slate-800'
+                        }`}>
+                          <Layers className={`w-4.5 h-4.5 transition-colors duration-300 ${
+                            isDarkMode ? 'text-indigo-400' : 'text-indigo-600'
+                          }`} />
                           Tùy chọn
                         </h3>
                         
@@ -1174,7 +1285,11 @@ export default function App() {
                           <div className="relative inline-block text-left">
                             <button
                               onClick={() => setDropdownOpen(!dropdownOpen)}
-                              className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl px-3.5 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer flex items-center justify-between gap-2 max-w-[220px] transition-all shadow-xs"
+                              className={`border text-xs font-bold rounded-xl px-3.5 py-2 focus:outline-none cursor-pointer flex items-center justify-between gap-2 max-w-[220px] transition-all shadow-xs ${
+                                isDarkMode 
+                                  ? 'bg-white/[0.04] hover:bg-white/[0.08] border-white/15 text-slate-200 focus:ring-2 focus:ring-indigo-500' 
+                                  : 'bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 focus:ring-2 focus:ring-indigo-500'
+                              }`}
                               title="Nhấp vào để chọn hoặc sắp xếp kì thi"
                             >
                               <span className="truncate">{activeExam.title}</span>
@@ -1184,11 +1299,19 @@ export default function App() {
                             {dropdownOpen && (
                               <>
                                 <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
-                                <div className="absolute right-0 mt-2 z-50 min-w-[280px] w-[320px] max-w-[90vw] bg-white rounded-2xl shadow-[0_12px_36px_-6px_rgba(0,0,0,0.12)] border border-slate-200/80 p-2 overflow-hidden">
-                                  <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest px-3 py-1.5 border-b border-slate-50 mb-1 flex items-center justify-between">
+                                <div className={`absolute right-0 mt-2 z-50 min-w-[280px] w-[320px] max-w-[90vw] rounded-2xl shadow-xl p-2 overflow-hidden transition-all duration-300 ${
+                                  isDarkMode 
+                                    ? 'bg-[#0f172a] border border-white/10 text-white shadow-[0_12px_40px_rgba(0,0,0,0.5)]' 
+                                    : 'bg-white border border-slate-200/80 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.12)]'
+                                }`}>
+                                  <div className={`text-[10px] font-extrabold uppercase tracking-widest px-3 py-1.5 border-b mb-1 flex items-center justify-between ${
+                                    isDarkMode ? 'text-slate-400 border-white/5' : 'text-slate-400 border-slate-50'
+                                  }`}>
                                     <span className="normal-case">Danh sách Bộ đề:</span>
                                     {userName === 'Admin-AMT' && (
-                                      <span className="text-[9px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded font-extrabold normal-case leading-relaxed">kéo & thả để sắp xếp</span>
+                                      <span className={`text-[9px] px-2 py-0.5 rounded font-extrabold normal-case leading-relaxed ${
+                                        isDarkMode ? 'text-indigo-300 bg-indigo-500/10' : 'text-indigo-600 bg-indigo-50'
+                                      }`}>kéo & thả để sắp xếp</span>
                                     )}
                                   </div>
                                   <div className="max-h-64 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
@@ -1208,15 +1331,25 @@ export default function App() {
                                           }}
                                           className={`group px-3 py-2 rounded-xl transition-all cursor-pointer flex items-center justify-between text-xs gap-2 border select-none ${
                                             isActive
-                                              ? 'bg-indigo-600 border-indigo-600 text-white font-bold shadow-md'
-                                              : 'bg-white hover:bg-slate-50 border-transparent text-slate-700 hover:text-slate-900 font-semibold'
-                                          } ${draggedIndex === index ? 'opacity-40 scale-95 border-dashed border-indigo-400' : ''}`}
+                                              ? isDarkMode
+                                                ? 'bg-indigo-500 border-indigo-500 text-white font-bold shadow-md shadow-indigo-500/20'
+                                                : 'bg-indigo-600 border-indigo-600 text-white font-bold shadow-md'
+                                              : isDarkMode
+                                                ? 'bg-transparent hover:bg-white/5 border-transparent text-slate-350 hover:text-white font-semibold'
+                                                : 'bg-white hover:bg-slate-50 border-transparent text-slate-700 hover:text-slate-900 font-semibold'
+                                          } ${draggedIndex === index ? (isDarkMode ? 'opacity-40 scale-95 border-dashed border-indigo-500' : 'opacity-40 scale-95 border-dashed border-indigo-400') : ''}`}
                                         >
                                           <div className="flex items-center gap-2 min-w-0 flex-1">
                                             {userName === 'Admin-AMT' && (
                                               <div 
                                                 className={`cursor-grab active:cursor-grabbing shrink-0 p-1 rounded-md transition-colors ${
-                                                  isActive ? 'text-indigo-200 hover:text-white hover:bg-indigo-700' : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-100'
+                                                  isActive 
+                                                    ? isDarkMode 
+                                                      ? 'text-indigo-200 hover:text-white hover:bg-indigo-600' 
+                                                      : 'text-indigo-200 hover:text-white hover:bg-indigo-700' 
+                                                    : isDarkMode 
+                                                      ? 'text-slate-500 hover:text-indigo-400 hover:bg-white/5' 
+                                                      : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-100'
                                                 }`}
                                                 title="Nắm và kéo để sắp xếp"
                                                 onClick={(e) => e.stopPropagation()}
@@ -1230,14 +1363,22 @@ export default function App() {
                                           <div className="flex items-center gap-1.5 shrink-0">
                                             {ex.isHidden && (
                                               <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider flex items-center gap-0.5 leading-none ${
-                                                isActive ? 'bg-indigo-700 text-indigo-100' : 'bg-rose-50 text-rose-600 border border-rose-100'
+                                                isActive 
+                                                  ? 'bg-indigo-700 text-indigo-100' 
+                                                  : isDarkMode
+                                                    ? 'bg-rose-500/10 text-rose-350 border border-rose-500/20'
+                                                    : 'bg-rose-50 text-rose-600 border border-rose-100'
                                               }`} title="Kỳ thi đang ẩn với học viên">
                                                 <EyeOff className="w-2.5 h-2.5" />
                                                 Ẩn
                                               </span>
                                             )}
                                             <span className={`text-[10px] font-mono whitespace-nowrap px-1.5 py-0.5 rounded ${
-                                              isActive ? 'bg-indigo-700 text-indigo-100' : 'bg-slate-100 text-slate-500'
+                                              isActive 
+                                                ? 'bg-indigo-700 text-indigo-100' 
+                                                : isDarkMode
+                                                  ? 'bg-white/5 text-slate-400'
+                                                  : 'bg-slate-100 text-slate-500'
                                             }`}>
                                               {(ex.questions || []).length} câu
                                             </span>
@@ -1254,7 +1395,9 @@ export default function App() {
                           {userName === 'Admin-AMT' && (
                             <button
                               onClick={() => setShowAddExamModal(true)}
-                              className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md cursor-pointer flex items-center justify-center transition-colors shrink-0"
+                              className={`p-2 rounded-xl shadow-md cursor-pointer flex items-center justify-center transition-colors shrink-0 text-white ${
+                                isDarkMode ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-indigo-600 hover:bg-indigo-700'
+                              }`}
                               title="Tải lên/Tạo kỳ thi mới"
                             >
                               <Plus className="w-4 h-4" />
@@ -1268,20 +1411,30 @@ export default function App() {
                         <motion.div 
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
-                          className="flex flex-col sm:flex-row gap-2 mt-2 p-3 bg-amber-50/50 rounded-2xl border border-amber-100/50"
+                          className={`flex flex-col sm:flex-row gap-2 mt-2 p-3 rounded-2xl border transition-colors duration-300 ${
+                            isDarkMode 
+                              ? 'bg-amber-950/20 border-amber-900/35 text-amber-200' 
+                              : 'bg-amber-50/50 rounded-2xl border border-amber-100/50'
+                          }`}
                         >
                           <div className="flex-1 flex gap-2 items-center">
-                            <span className="text-[10px] font-bold text-amber-800 uppercase shrink-0">Chỉnh sửa:</span>
+                            <span className={`text-[10px] font-bold uppercase shrink-0 ${isDarkMode ? 'text-amber-400' : 'text-amber-800'}`}>Chỉnh sửa:</span>
                             <input
                               type="text"
                               value={editingExamTitle}
                               onChange={(e) => setEditingExamTitle(e.target.value)}
                               placeholder="Đổi tên kỳ thi..."
-                              className="flex-1 min-w-[150px] px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none"
+                              className={`flex-1 min-w-[150px] px-3 py-1.5 rounded-lg text-xs font-semibold focus:outline-none transition-colors ${
+                                isDarkMode 
+                                  ? 'bg-white/5 border border-white/10 text-white focus:border-amber-500/50' 
+                                  : 'bg-white border border-slate-200 text-slate-800'
+                              }`}
                             />
                             <button
                               onClick={() => handleRenameExam(editingExamTitle)}
-                              className="px-3 py-1.5 bg-amber-600 hover:bg-amber-750 text-white font-bold text-[10px] rounded-lg cursor-pointer transition uppercase shrink-0"
+                              className={`px-3 py-1.5 text-white font-bold text-[10px] rounded-lg cursor-pointer transition uppercase shrink-0 ${
+                                isDarkMode ? 'bg-amber-700 hover:bg-amber-600' : 'bg-amber-600 hover:bg-amber-750'
+                              }`}
                             >
                               Lưu tên
                             </button>
@@ -1293,7 +1446,9 @@ export default function App() {
                               className={`px-3 py-1.5 font-bold text-[10px] rounded-lg cursor-pointer transition flex items-center gap-1 text-white uppercase ${
                                 activeExam.isHidden 
                                   ? 'bg-rose-500 hover:bg-rose-600' 
-                                  : 'bg-emerald-600 hover:bg-emerald-705'
+                                  : isDarkMode 
+                                    ? 'bg-emerald-650 hover:bg-emerald-555' 
+                                    : 'bg-emerald-600 hover:bg-emerald-705'
                               }`}
                             >
                               {activeExam.isHidden ? (
@@ -1312,7 +1467,9 @@ export default function App() {
                             {selectedExamId !== 'default' && (
                               <button
                                 onClick={handleDeleteExam}
-                                className="px-3 py-1.5 bg-rose-650 hover:bg-rose-750 font-bold text-[10px] rounded-lg cursor-pointer transition flex items-center gap-1 text-white uppercase"
+                                className={`px-3 py-1.5 font-bold text-[10px] rounded-lg cursor-pointer transition flex items-center gap-1 text-white uppercase ${
+                                  isDarkMode ? 'bg-rose-600 hover:bg-rose-500' : 'bg-rose-650 hover:bg-rose-750'
+                                }`}
                                 title="Xóa kỳ thi vĩnh viễn"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -1324,10 +1481,10 @@ export default function App() {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch">
                       {/* Mode Option Selection */}
-                      <div className="flex flex-col justify-between h-full space-y-3">
-                        <label className="block text-sm font-bold text-slate-700">Chế độ làm bài</label>
+                      <div className="flex flex-col justify-between h-full space-y-2">
+                        <label className={`block text-xs font-extrabold uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Chế độ làm bài</label>
                         <div className="grid grid-cols-2 gap-3 flex-grow">
                           <button
                             onClick={() => {
@@ -1335,14 +1492,14 @@ export default function App() {
                               setIsCustomTarget(false);
                               setTargetCount(10);
                             }}
-                            className={`p-5 rounded-2xl border transition-all cursor-pointer flex flex-col items-center justify-center gap-2 h-full min-h-[110px] ${
+                            className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 h-full min-h-[90px] ${
                               quizMode === 'exam'
                                 ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg ring-4 ring-indigo-100'
                                 : 'bg-slate-50/50 border-slate-100 text-slate-700 hover:border-indigo-600 hover:bg-white'
                             }`}
                           >
-                            <Award className={`w-8 h-8 shrink-0 transition-colors ${quizMode === 'exam' ? 'text-amber-300' : 'text-amber-500'}`} />
-                            <span className="text-base sm:text-lg font-extrabold tracking-wide font-sans">Thi Thử</span>
+                            <Award className={`w-6 h-6 shrink-0 transition-colors ${quizMode === 'exam' ? 'text-amber-300' : 'text-amber-500'}`} />
+                            <span className="text-sm sm:text-base font-extrabold tracking-wide font-sans">Thi Thử</span>
                           </button>
 
                           <button
@@ -1350,21 +1507,21 @@ export default function App() {
                               setQuizMode('practice');
                               setIsCustomTarget(true);
                             }}
-                            className={`p-5 rounded-2xl border transition-all cursor-pointer flex flex-col items-center justify-center gap-2 h-full min-h-[110px] ${
+                            className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 h-full min-h-[90px] ${
                               quizMode === 'practice'
                                 ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg ring-4 ring-indigo-100'
                                 : 'bg-slate-50/50 border-slate-100 text-slate-700 hover:border-indigo-600 hover:bg-white'
                             }`}
                           >
-                            <BookOpen className={`w-8 h-8 shrink-0 transition-colors ${quizMode === 'practice' ? 'text-sky-300' : 'text-sky-500'}`} />
-                            <span className="text-base sm:text-lg font-extrabold tracking-wide font-sans">Ôn Tập</span>
+                            <BookOpen className={`w-6 h-6 shrink-0 transition-colors ${quizMode === 'practice' ? 'text-sky-300' : 'text-sky-500'}`} />
+                            <span className="text-sm sm:text-base font-extrabold tracking-wide font-sans">Ôn Tập</span>
                           </button>
                         </div>
                       </div>
 
                       {/* Limits Parameter */}
-                      <div className="flex flex-col justify-between h-full space-y-3">
-                        <label className="block text-sm font-bold text-slate-700">Số lượng câu hỏi</label>
+                      <div className="flex flex-col justify-between h-full space-y-2">
+                        <label className={`block text-xs font-extrabold uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Số lượng câu hỏi</label>
                         <div className="grid grid-cols-2 gap-3 flex-grow">
                           {quizMode === 'practice' ? (
                             (() => {
@@ -1382,13 +1539,13 @@ export default function App() {
                                       setIsCustomTarget(true);
                                       setCustomInputText(ranges.r1);
                                     }}
-                                    className={`p-4 rounded-xl border flex flex-col items-center justify-center font-bold text-sm transition-all cursor-pointer h-full ${
+                                    className={`p-2.5 rounded-xl border flex flex-col items-center justify-center font-bold text-xs sm:text-sm transition-all cursor-pointer h-full ${
                                       is1Active
                                         ? 'bg-indigo-600 border-indigo-600 text-white shadow-md ring-4 ring-indigo-100'
                                         : 'bg-slate-50/50 border-slate-100 text-slate-700 hover:border-indigo-600 hover:bg-white'
                                     }`}
                                   >
-                                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Phần 1/3</span>
+                                    <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Phần 1/3</span>
                                     <span>Câu {pad(ranges.s1)} &rarr; {pad(ranges.e1)}</span>
                                   </button>
 
@@ -1398,13 +1555,13 @@ export default function App() {
                                       setIsCustomTarget(true);
                                       setCustomInputText(ranges.r2);
                                     }}
-                                    className={`p-4 rounded-xl border flex flex-col items-center justify-center font-bold text-sm transition-all cursor-pointer h-full ${
+                                    className={`p-2.5 rounded-xl border flex flex-col items-center justify-center font-bold text-xs sm:text-sm transition-all cursor-pointer h-full ${
                                       is2Active
                                         ? 'bg-indigo-600 border-indigo-600 text-white shadow-md ring-4 ring-indigo-100'
                                         : 'bg-slate-50/50 border-slate-100 text-slate-700 hover:border-indigo-600 hover:bg-white'
                                     }`}
                                   >
-                                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Phần 2/3</span>
+                                    <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Phần 2/3</span>
                                     <span>Câu {pad(ranges.s2)} &rarr; {pad(ranges.e2)}</span>
                                   </button>
 
@@ -1414,13 +1571,13 @@ export default function App() {
                                       setIsCustomTarget(true);
                                       setCustomInputText(ranges.r3);
                                     }}
-                                    className={`p-4 rounded-xl border flex flex-col items-center justify-center font-bold text-sm transition-all cursor-pointer h-full ${
+                                    className={`p-2.5 rounded-xl border flex flex-col items-center justify-center font-bold text-xs sm:text-sm transition-all cursor-pointer h-full ${
                                       is3Active
                                         ? 'bg-indigo-600 border-indigo-600 text-white shadow-md ring-4 ring-indigo-100'
                                         : 'bg-slate-50/50 border-slate-100 text-slate-700 hover:border-indigo-600 hover:bg-white'
                                     }`}
                                   >
-                                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Phần 3/3</span>
+                                    <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Phần 3/3</span>
                                     <span>Câu {pad(ranges.s3)} &rarr; {pad(ranges.e3)}</span>
                                   </button>
                                 </>
@@ -1434,7 +1591,7 @@ export default function App() {
                                   setTargetCount(Math.min(10, activeQuestionsCount));
                                   setIsCustomTarget(false);
                                 }}
-                                className={`p-4 rounded-xl border flex flex-col items-center justify-center font-bold text-sm transition-all cursor-pointer h-full ${
+                                className={`p-2.5 rounded-xl border flex flex-col items-center justify-center font-bold text-xs sm:text-sm transition-all cursor-pointer h-full ${
                                   !isCustomTarget && targetCount === Math.min(10, activeQuestionsCount)
                                     ? 'bg-indigo-600 border-indigo-600 text-white shadow-md ring-4 ring-indigo-100'
                                     : 'bg-slate-50/50 border-slate-100 text-slate-700 hover:border-indigo-600 hover:bg-white'
@@ -1449,7 +1606,7 @@ export default function App() {
                                   setTargetCount(Math.min(50, activeQuestionsCount));
                                   setIsCustomTarget(false);
                                 }}
-                                className={`p-4 rounded-xl border flex flex-col items-center justify-center font-bold text-sm transition-all cursor-pointer h-full ${
+                                className={`p-2.5 rounded-xl border flex flex-col items-center justify-center font-bold text-xs sm:text-sm transition-all cursor-pointer h-full ${
                                   !isCustomTarget && targetCount === Math.min(50, activeQuestionsCount) && Math.min(50, activeQuestionsCount) !== Math.min(10, activeQuestionsCount)
                                     ? 'bg-indigo-600 border-indigo-600 text-white shadow-md ring-4 ring-indigo-100'
                                     : 'bg-slate-50/50 border-slate-100 text-slate-700 hover:border-indigo-600 hover:bg-white'
@@ -1464,7 +1621,7 @@ export default function App() {
                                   setTargetCount(activeQuestionsCount);
                                   setIsCustomTarget(false);
                                 }}
-                                className={`p-4 rounded-xl border flex flex-col items-center justify-center font-bold text-sm transition-all cursor-pointer h-full ${
+                                className={`p-2.5 rounded-xl border flex flex-col items-center justify-center font-bold text-xs sm:text-sm transition-all cursor-pointer h-full ${
                                   !isCustomTarget && (targetCount === activeQuestionsCount || targetCount === 0)
                                     ? 'bg-indigo-600 border-indigo-600 text-white shadow-md ring-4 ring-indigo-100'
                                     : 'bg-slate-50/50 border-slate-100 text-slate-700 hover:border-indigo-600 hover:bg-white'
@@ -1481,7 +1638,7 @@ export default function App() {
                             onClick={() => {
                               setIsCustomTarget(true);
                             }}
-                            className={`p-3 rounded-xl border flex flex-col items-center justify-center h-full transition-all cursor-pointer ${
+                            className={`p-2 rounded-xl border flex flex-col items-center justify-center h-full transition-all cursor-pointer ${
                               (() => {
                                 if (quizMode === 'practice') {
                                   const ranges = getPracticeRanges();
@@ -1560,48 +1717,56 @@ export default function App() {
                     </div>
 
                     {/* Extra detailed Toggles */}
-                    <div className="space-y-4 pt-6 border-t border-slate-100">
-                      <h4 className="text-xs uppercase tracking-wider text-slate-400 font-bold">Tùy chọn xáo trộn nâng cao</h4>
+                    <div className={`space-y-2.5 pt-3.5 border-t ${isDarkMode ? 'border-white/10' : 'border-slate-100'}`}>
+                      <h4 className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Tùy chọn xáo trộn nâng cao</h4>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <label className="flex items-center gap-3 bg-slate-50/50 hover:bg-white hover:border-indigo-600 p-4 rounded-xl border border-slate-100 cursor-pointer transition">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label className={`flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl border cursor-pointer transition ${
+                          isDarkMode 
+                            ? 'bg-white/[0.02] border-white/10 hover:border-indigo-500 hover:bg-white/[0.04]' 
+                            : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-indigo-600'
+                        }`}>
                           <input
                             type="checkbox"
                             checked={shuffleQuestionsRule}
                             onChange={(e) => setShuffleQuestionsRule(e.target.checked)}
-                            className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
+                            className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
                           />
                           <div>
-                            <span className="text-sm font-semibold text-slate-800 block">Xáo trộn thứ tự các câu hỏi</span>
-                            <p className="text-[10px] text-slate-400 font-medium">Chọn ngẫu nhiên câu hỏi từ ngân hàng đề</p>
+                            <span className={`text-xs sm:text-sm font-semibold block ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>Xáo trộn thứ tự các câu hỏi</span>
+                            <p className="text-[9px] text-slate-400 font-medium">Chọn ngẫu nhiên câu hỏi từ ngân hàng đề</p>
                           </div>
                         </label>
 
-                        <label className="flex items-center gap-3 bg-slate-50/50 hover:bg-white hover:border-indigo-600 p-4 rounded-xl border border-slate-100 cursor-pointer transition">
+                        <label className={`flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl border cursor-pointer transition ${
+                          isDarkMode 
+                            ? 'bg-white/[0.02] border-white/10 hover:border-indigo-500 hover:bg-white/[0.04]' 
+                            : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-indigo-600'
+                        }`}>
                           <input
                             type="checkbox"
                             checked={shuffleOptionsRule}
                             onChange={(e) => setShuffleOptionsRule(e.target.checked)}
-                            className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
+                            className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
                           />
                           <div>
-                            <span className="text-sm font-semibold text-slate-800 block">Xáo trộn 4 đáp án lựa chọn</span>
-                            <p className="text-[10px] text-slate-400 font-medium">Thứ tự A, B, C, D thay đổi ngẫu nhiên</p>
+                            <span className={`text-xs sm:text-sm font-semibold block ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>Xáo trộn 4 đáp án lựa chọn</span>
+                            <p className="text-[9px] text-slate-400 font-medium">Thứ tự A, B, C, D thay đổi ngẫu nhiên</p>
                           </div>
                         </label>
                       </div>
                     </div>
 
                     {/* Confirm Action Button */}
-                    <div className="pt-2">
+                    <div className="pt-1.5">
                       <motion.button
                         onClick={handleStartQuiz}
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}
                         id="btn-start-quiz"
-                        className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-2xl shadow-lg shadow-indigo-100 hover:shadow-indigo-200 hover:shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                       >
-                        <Play className="w-5 h-5 fill-current" />
+                        <Play className="w-4.5 h-4.5 fill-current" />
                         BẮT ĐẦU LÀM BÀI NGAY
                       </motion.button>
                     </div>
@@ -1759,10 +1924,16 @@ export default function App() {
               className="w-full flex-grow flex flex-col lg:flex-row gap-8 items-start"
             >
               {/* Question container card (Left Side) */}
-              <div className="flex-1 w-full bg-white rounded-2xl p-4 sm:p-5 lg:p-7 shadow-[0_4px_25px_rgba(0,0,0,0.015)] border border-slate-100">
+              <div className={`flex-1 w-full rounded-2xl p-4 sm:p-5 lg:p-7 shadow-lg transition-colors duration-300 border ${
+                isDarkMode 
+                  ? 'bg-[#0f172a]/60 border-white/10 text-white backdrop-blur-xl' 
+                  : 'bg-white border-slate-100 text-slate-800'
+              }`}>
                 
                 {/* Embedded Progress indicator */}
-                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-4 md:hidden">
+                <div className={`w-full h-1.5 rounded-full overflow-hidden mb-4 md:hidden ${
+                  isDarkMode ? 'bg-white/10' : 'bg-slate-100'
+                }`}>
                   <motion.div
                     className="bg-indigo-600 h-full rounded-full"
                     id="exam-progress-bar-fill"
@@ -1779,10 +1950,13 @@ export default function App() {
                   selectedAnswer={userAnswers[currentIndex] ?? null}
                   onSelectAnswer={handleSelectAnswer}
                   mode={quizMode}
+                  isDarkMode={isDarkMode}
                 />
 
                 {/* Sub Navigation Panel */}
-                <div className="flex flex-wrap items-center justify-between border-t border-slate-100 pt-4 mt-5 gap-3">
+                <div className={`flex flex-wrap items-center justify-between border-t pt-4 mt-5 gap-3 transition-colors ${
+                  isDarkMode ? 'border-white/10' : 'border-slate-100'
+                }`}>
                   <button
                     onClick={handleSubmitQuiz}
                     className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition shadow-lg shadow-red-100 hover:shadow-xl flex items-center justify-center gap-1.5 cursor-pointer text-sm"
@@ -1792,7 +1966,7 @@ export default function App() {
                   </button>
 
                   <div className="hidden sm:flex items-center gap-1 text-xs text-slate-400 font-mono">
-                    Đã hoàn thành <strong className="text-slate-700">{answeredCount}</strong>/{examQuestions.length} câu
+                    Đã hoàn thành <strong className={isDarkMode ? 'text-slate-200' : 'text-slate-700'}>{answeredCount}</strong>/{examQuestions.length} câu
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -1821,29 +1995,47 @@ export default function App() {
               {/* Sidebar Quick Jump - Question Grid Mapping (Right Side on desktop, mobile slide-over) */}
               <div
                 id="sidebar-jump-panel"
-                className={`fixed lg:relative top-0 right-0 h-full lg:h-auto z-50 lg:z-0 w-80 lg:w-72 bg-white lg:bg-transparent border-l lg:border-l-0 border-slate-200 lg:border-none p-5 lg:p-0 flex flex-col gap-5 transition-transform duration-300 shadow-xl lg:shadow-none ${
+                className={`fixed lg:relative top-0 right-0 h-full lg:h-auto z-50 lg:z-0 w-80 lg:w-72 border-l lg:border-l-0 lg:border-none p-5 lg:p-0 flex flex-col gap-5 transition-all duration-300 shadow-xl lg:shadow-none ${
+                  isDarkMode 
+                    ? 'bg-[#0f172a] lg:bg-transparent border-white/10' 
+                    : 'bg-white lg:bg-transparent border-slate-200'
+                } ${
                   sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
                 }`}
               >
                 {/* Mobile sidebar header */}
-                <div className="flex lg:hidden items-center justify-between border-b pb-4">
-                  <h3 className="font-extrabold text-slate-800 text-sm uppercase">Sơ đồ làm bài</h3>
+                <div className={`flex lg:hidden items-center justify-between border-b pb-4 ${
+                  isDarkMode ? 'border-white/10' : 'border-slate-200'
+                }`}>
+                  <h3 className={`font-extrabold text-sm uppercase ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>Sơ đồ làm bài</h3>
                   <button
                     onClick={() => setSidebarOpen(false)}
-                    className="p-1.5 rounded-lg hover:bg-slate-150 border text-slate-500"
+                    className={`p-1.5 rounded-lg border ${
+                      isDarkMode 
+                        ? 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10' 
+                        : 'bg-slate-150 border-slate-200 text-slate-500 hover:bg-slate-200'
+                    }`}
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
 
                 {/* Grid Navigation container */}
-                <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-[0_4px_25px_rgba(0,0,0,0.015)] border border-slate-100 space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-50 pb-3">
+                <div className={`transition-colors duration-300 rounded-2xl p-4 sm:p-5 shadow-lg border space-y-4 ${
+                  isDarkMode 
+                    ? 'bg-[#0f172a]/60 border-white/10 text-white backdrop-blur-xl' 
+                    : 'bg-white border-slate-100 text-slate-800'
+                }`}>
+                  <div className={`flex items-center justify-between border-b pb-3 ${
+                    isDarkMode ? 'border-white/5' : 'border-slate-50'
+                  }`}>
                     <h4 className="text-xs font-extrabold uppercase tracking-wide text-slate-400 flex items-center gap-2">
-                      <BookMarked className="w-4 h-4 text-slate-500" />
+                      <BookMarked className={`w-4 h-4 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} />
                       Danh sách {examQuestions.length} câu
                     </h4>
-                    <span className="text-xs font-bold font-mono text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full">
+                    <span className={`text-xs font-bold font-mono px-2.5 py-1 rounded-full ${
+                      isDarkMode ? 'text-indigo-300 bg-indigo-500/10' : 'text-indigo-700 bg-indigo-50'
+                    }`}>
                       {answeredCount}/{examQuestions.length}
                     </span>
                   </div>
@@ -1859,11 +2051,17 @@ export default function App() {
 
                       let cellClass = "w-full aspect-square rounded-xl flex items-center justify-center font-bold text-xs transition border cursor-pointer font-mono ";
                       if (isCurrent) {
-                        cellClass += "bg-indigo-600 border-indigo-600 text-white font-bold ring-4 ring-indigo-100 shadow-sm ";
+                        cellClass += isDarkMode 
+                          ? "bg-indigo-500 border-indigo-500 text-white font-bold ring-4 ring-indigo-500/20 shadow-sm "
+                          : "bg-indigo-600 border-indigo-600 text-white font-bold ring-4 ring-indigo-100 shadow-sm ";
                       } else if (isOptionSelected) {
-                        cellClass += "bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100/50 ";
+                        cellClass += isDarkMode
+                          ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/25 "
+                          : "bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100/50 ";
                       } else {
-                        cellClass += "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-350 ";
+                        cellClass += isDarkMode
+                          ? "bg-white/[0.03] border-white/10 text-slate-400 hover:bg-white/10 hover:border-slate-400 "
+                          : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-350 ";
                       }
 
                       return (
@@ -1882,10 +2080,12 @@ export default function App() {
                   </div>
 
                   {/* Submission CTA directly inside the navigations panel */}
-                  <div className="pt-3 border-t border-slate-100">
+                  <div className={`pt-3 border-t ${isDarkMode ? 'border-white/10' : 'border-slate-100'}`}>
                     <button
                       onClick={handleSubmitQuiz}
-                      className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs tracking-wider uppercase rounded-xl transition duration-150 text-center flex items-center justify-center gap-1.5 shadow-md shadow-red-50 cursor-pointer"
+                      className={`w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs tracking-wider uppercase rounded-xl transition duration-150 text-center flex items-center justify-center gap-1.5 cursor-pointer ${
+                        isDarkMode ? '' : 'shadow-md shadow-red-50'
+                      }`}
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Nộp bài kết quả
@@ -1918,6 +2118,7 @@ export default function App() {
                 userAnswers={userAnswers}
                 timeSpent={timeSpent}
                 onRestart={() => setPhase('intro')}
+                isDarkMode={isDarkMode}
               />
             </motion.div>
           )}

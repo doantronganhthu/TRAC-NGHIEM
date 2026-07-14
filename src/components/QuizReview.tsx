@@ -8,6 +8,7 @@ interface QuizReviewProps {
   userAnswers: UserAnswers;
   timeSpent: number; // in seconds
   onRestart: () => void;
+  isDarkMode?: boolean;
 }
 
 export const QuizReview: React.FC<QuizReviewProps> = ({
@@ -15,6 +16,7 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
   userAnswers,
   timeSpent,
   onRestart,
+  isDarkMode = false,
 }) => {
   const [filter, setFilter] = useState<'all' | 'correct' | 'incorrect'>('all');
   const [expandedId, setExpandedId] = useState<number | null>(null);
@@ -51,15 +53,15 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
   if (scorePercent === 100) {
     feedbackTitle = 'Thật xuất sắc!';
     feedbackDesc = 'Bạn quả là một Thiên tài!';
-    feedbackColor = 'text-emerald-700 bg-emerald-50';
+    feedbackColor = isDarkMode ? 'text-emerald-300 bg-emerald-500/20 border border-emerald-500/30' : 'text-emerald-700 bg-emerald-50';
   } else if (scorePercent >= 80) {
     feedbackTitle = 'Làm tốt lắm!';
     feedbackDesc = 'Bạn đã vượt qua kỳ thi này!';
-    feedbackColor = 'text-indigo-700 bg-indigo-50';
+    feedbackColor = isDarkMode ? 'text-indigo-300 bg-indigo-500/20 border border-indigo-500/30' : 'text-indigo-700 bg-indigo-50';
   } else {
     feedbackTitle = 'Cố gắng lên!';
     feedbackDesc = 'Bạn sẽ làm tốt hơn ở lần sau!';
-    feedbackColor = 'text-rose-600 bg-rose-50';
+    feedbackColor = isDarkMode ? 'text-rose-300 bg-rose-500/20 border border-rose-500/30' : 'text-rose-600 bg-rose-50';
   }
 
   // Filtered list
@@ -82,7 +84,11 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
   return (
     <div id="quiz-review-container" className="space-y-8 w-full max-w-4xl mx-auto">
       {/* Score Header Card */}
-      <div id="score-header-card" className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-center gap-8">
+      <div id="score-header-card" className={`border rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center gap-8 ${
+        isDarkMode 
+          ? 'bg-[#0f172a]/60 border-white/10 text-white backdrop-blur-xl shadow-2xl' 
+          : 'bg-white border-slate-100 text-slate-900 shadow-sm'
+      }`}>
         
         {/* Progress Circle Visualizer */}
         <div id="score-meter-visual" className="flex-shrink-0 relative w-40 h-40 flex items-center justify-center">
@@ -92,7 +98,7 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
               cx="80"
               cy="80"
               r="70"
-              className="stroke-slate-100 fill-none"
+              className={`fill-none ${isDarkMode ? 'stroke-white/5' : 'stroke-slate-100'}`}
               strokeWidth="12"
             />
             {/* Active Percentage Path */}
@@ -113,10 +119,10 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
             />
           </svg>
           <div className="absolute text-center">
-            <span className="text-3xl font-extrabold text-slate-800 font-mono">
+            <span className={`text-3xl font-extrabold font-mono ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
               {scorePercent}%
             </span>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mt-0.5">
+            <p className={`text-xs font-semibold uppercase tracking-widest mt-0.5 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
               Hoàn Thành
             </p>
           </div>
@@ -127,29 +133,35 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
           <div className={`inline-block px-4 py-2 rounded-2xl text-sm font-bold ${feedbackColor}`}>
             {feedbackTitle}
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 leading-tight">
+          <h1 className={`text-2xl font-bold leading-tight ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
             Kết quả: {correctCount}/{total} câu đúng
           </h1>
-          <p className="text-slate-600 text-sm leading-relaxed max-w-lg">
+          <p className={`text-sm leading-relaxed max-w-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
             {feedbackDesc}
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 pt-2">
-            <div className="bg-emerald-50/50 p-3 rounded-2xl border border-emerald-100/50 text-center col-span-1">
-              <span className="block text-xs font-semibold text-emerald-600">Đúng</span>
-              <span className="text-sm font-bold text-emerald-700 font-mono mt-0.5 inline-block">
+            <div className={`p-3 rounded-2xl text-center col-span-1 border ${
+              isDarkMode ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-350' : 'bg-emerald-50/50 border-emerald-100/50 text-emerald-700'
+            }`}>
+              <span className="block text-xs font-semibold opacity-90">Đúng</span>
+              <span className="text-sm font-bold font-mono mt-0.5 inline-block">
                 {correctCount}
               </span>
             </div>
-            <div className="bg-rose-50/50 p-3 rounded-2xl border border-rose-100/50 text-center col-span-1">
-              <span className="block text-xs font-semibold text-rose-600">Sai</span>
-              <span className="text-sm font-bold text-rose-700 font-mono mt-0.5 inline-block">
+            <div className={`p-3 rounded-2xl text-center col-span-1 border ${
+              isDarkMode ? 'bg-rose-500/10 border-rose-500/20 text-rose-350' : 'bg-rose-50/50 border-rose-100/50 text-rose-700'
+            }`}>
+              <span className="block text-xs font-semibold opacity-90">Sai</span>
+              <span className="text-sm font-bold font-mono mt-0.5 inline-block">
                 {incorrectCount + skippedCount}
               </span>
             </div>
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center col-span-2">
-              <span className="block text-xs font-semibold text-slate-500">Thời gian làm bài</span>
-              <span className="text-sm font-bold text-slate-800 font-mono mt-0.5 inline-block">
+            <div className={`p-3 rounded-2xl text-center col-span-2 border ${
+              isDarkMode ? 'bg-white/[0.03] border-white/10 text-slate-250' : 'bg-slate-50 border-slate-100 text-slate-800'
+            }`}>
+              <span className={`block text-xs font-semibold ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Thời gian làm bài</span>
+              <span className="text-sm font-bold font-mono mt-0.5 inline-block">
                 {formatTime(timeSpent)}
               </span>
             </div>
@@ -158,14 +170,16 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
       </div>
 
       {/* Primary CTA and Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-5">
-        <div id="results-filter-tabs" className="flex bg-slate-100 p-1 rounded-xl">
+      <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 border-b pb-5 ${
+        isDarkMode ? 'border-white/10' : 'border-slate-100'
+      }`}>
+        <div id="results-filter-tabs" className={`flex p-1 rounded-xl ${isDarkMode ? 'bg-white/5 border border-white/10' : 'bg-slate-100'}`}>
           <button
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               filter === 'all'
-                ? 'bg-slate-800 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 bg-transparent'
+                ? isDarkMode ? 'bg-white text-slate-950 shadow-md' : 'bg-slate-800 text-white shadow-xs'
+                : isDarkMode ? 'text-slate-400 hover:text-white bg-transparent' : 'text-slate-600 hover:text-slate-900 bg-transparent'
             }`}
           >
             Tất cả ({total})
@@ -175,7 +189,7 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
             className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               filter === 'correct'
                 ? 'bg-emerald-500 text-white shadow-xs'
-                : 'text-emerald-600 hover:bg-emerald-50/60 bg-transparent'
+                : isDarkMode ? 'text-emerald-400 hover:bg-emerald-500/10 bg-transparent' : 'text-emerald-600 hover:bg-emerald-50/60 bg-transparent'
             }`}
           >
             Đúng ({correctCount})
@@ -185,7 +199,7 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
             className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               filter === 'incorrect'
                 ? 'bg-rose-500 text-white shadow-xs'
-                : 'text-rose-600 hover:bg-rose-50/60 bg-transparent'
+                : isDarkMode ? 'text-rose-400 hover:bg-rose-500/10 bg-transparent' : 'text-rose-600 hover:bg-rose-50/60 bg-transparent'
             }`}
           >
             Sai ({incorrectCount + skippedCount})
@@ -195,7 +209,11 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
         <button
           onClick={onRestart}
           id="quiz-restart-after-results"
-          className="w-full sm:w-auto px-6 py-3 bg-indigo-650 hover:bg-slate-800 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer bg-slate-900"
+          className={`w-full sm:w-auto px-6 py-3 font-bold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer ${
+            isDarkMode 
+              ? 'bg-indigo-500 hover:bg-indigo-650 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]' 
+              : 'bg-slate-900 hover:bg-slate-800 text-white'
+          }`}
         >
           <RotateCcw className="w-4 h-4" />
           Về Trang Chủ
@@ -205,7 +223,9 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
       {/* Question Review List */}
       <div id="questions-review-list" className="space-y-4">
         {filteredQuestions.length === 0 ? (
-          <div className="p-12 text-center bg-slate-50 border border-slate-100 rounded-2xl">
+          <div className={`p-12 text-center border rounded-2xl ${
+            isDarkMode ? 'bg-white/[0.02] border-white/5' : 'bg-slate-50 border-slate-100'
+          }`}>
             <p className="text-slate-500 text-sm">Không tìm thấy câu hỏi nào tương ứng.</p>
           </div>
         ) : (
@@ -221,12 +241,18 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
               <div
                 key={`review-${q.id}`}
                 id={`review-item-${q.id}`}
-                className={`bg-white border rounded-2xl overflow-hidden shadow-xs transition-all ${
-                  isCorrect
-                    ? 'border-emerald-100 hover:border-emerald-200'
+                className={`border rounded-2xl overflow-hidden shadow-xs transition-all ${
+                  isDarkMode
+                    ? isCorrect
+                      ? 'border-emerald-500/20 bg-white/[0.03] hover:border-emerald-500/40 hover:bg-white/[0.05]'
+                      : isSkipped
+                      ? 'border-white/5 bg-white/[0.03] hover:border-white/15 hover:bg-white/[0.05]'
+                      : 'border-rose-500/20 bg-white/[0.03] hover:border-rose-500/40 hover:bg-white/[0.05]'
+                    : isCorrect
+                    ? 'border-emerald-100 hover:border-emerald-200 bg-white'
                     : isSkipped
-                    ? 'border-slate-200 hover:border-slate-350'
-                    : 'border-rose-100 hover:border-rose-200'
+                    ? 'border-slate-200 hover:border-slate-350 bg-white'
+                    : 'border-rose-100 hover:border-rose-200 bg-white'
                 }`}
               >
                 {/* Accordion Trigger Header */}
@@ -240,7 +266,9 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
                         <Check className="w-4 h-4" />
                       </div>
                     ) : isSkipped ? (
-                      <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-mono">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono ${
+                        isDarkMode ? 'bg-white/5 text-slate-400' : 'bg-slate-100 text-slate-500'
+                      }`}>
                         ?
                       </div>
                     ) : (
@@ -252,40 +280,56 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
 
                   <div className="flex-1 space-y-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-400 font-mono">
+                      <span className={`text-xs font-bold font-mono ${isDarkMode ? 'text-slate-400' : 'text-slate-400'}`}>
                         Câu {originalExamIdx + 1}
                       </span>
                       {isSkipped && (
-                        <span className="px-2 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-600 rounded">
+                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${
+                          isDarkMode ? 'bg-white/10 text-slate-300' : 'bg-slate-100 text-slate-600'
+                        }`}>
                           Chưa trả lời
                         </span>
                       )}
                     </div>
-                    <p className="text-sm font-medium text-slate-800 font-sans leading-relaxed">
+                    <p className={`text-sm font-medium font-sans leading-relaxed ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
                       {q.question}
                     </p>
                   </div>
 
-                  <div className="flex-shrink-0 text-slate-400 mt-1">
+                  <div className={`flex-shrink-0 mt-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-400'}`}>
                     {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                   </div>
                 </div>
 
                 {/* Expanded Answer Keying Layout */}
                 {isExpanded && (
-                  <div className="border-t border-slate-50 bg-slate-50/50 p-4 sm:p-5 space-y-4">
+                  <div className={`border-t p-4 sm:p-5 space-y-4 ${
+                    isDarkMode ? 'border-white/5 bg-white/[0.01]' : 'border-slate-50 bg-slate-50/50'
+                  }`}>
                     <div className="grid grid-cols-1 gap-3.5">
                       {q.shuffledOptions.map((opt, oIdx) => {
                         const isOptSelected = selectedAns === opt.originalKey;
                         const isOptCorrect = opt.originalKey === q.answer;
 
-                        let optClass = "p-3.5 text-xs sm:text-sm rounded-xl border bg-white flex items-start gap-3 ";
+                        let optClass = "p-3.5 text-xs sm:text-sm rounded-xl border flex items-start gap-3 transition-colors ";
                         if (isOptCorrect) {
-                          optClass += "border-emerald-300 bg-emerald-50/50 text-emerald-900";
+                          if (isDarkMode) {
+                            optClass += "border-emerald-500/30 bg-emerald-500/10 text-emerald-200";
+                          } else {
+                            optClass += "border-emerald-300 bg-emerald-50/50 text-emerald-900";
+                          }
                         } else if (isOptSelected) {
-                          optClass += "border-rose-300 bg-rose-50/50 text-rose-900";
+                          if (isDarkMode) {
+                            optClass += "border-rose-500/35 bg-rose-500/10 text-rose-200";
+                          } else {
+                            optClass += "border-rose-300 bg-rose-50/50 text-rose-900";
+                          }
                         } else {
-                          optClass += "border-slate-100 text-slate-800 opacity-90";
+                          if (isDarkMode) {
+                            optClass += "border-white/5 bg-white/[0.02] text-slate-300 opacity-90";
+                          } else {
+                            optClass += "border-slate-100 bg-white text-slate-800 opacity-90";
+                          }
                         }
 
                         const letter = String.fromCharCode(65 + oIdx);
@@ -297,7 +341,7 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
                                 ? 'bg-emerald-500 text-white'
                                 : isOptSelected
                                 ? 'bg-rose-500 text-white'
-                                : 'bg-slate-100 text-slate-500'
+                                : isDarkMode ? 'bg-white/10 text-slate-300' : 'bg-slate-100 text-slate-500'
                             }`}>
                               {letter}
                             </span>

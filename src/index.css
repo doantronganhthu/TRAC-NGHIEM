@@ -1,9 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;505;600;700;800&family=JetBrains+Mono:wght@400;505;700&family=Patrick+Hand&family=Mali:wght@400;600;700&family=Itim&family=Dancing+Script:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Patrick+Hand&family=Mali:wght@400;600;700&family=Itim&family=Dancing+Script:wght@400;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+  --font-serif: "Lora", "Times New Roman", Times, serif;
   --font-handwritten: "Patrick Hand", "Mali", "Itim", "Dancing Script", cursive;
 }
 
