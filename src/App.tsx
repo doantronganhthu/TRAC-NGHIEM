@@ -1033,9 +1033,12 @@ export default function App() {
                 E
               </div>
             )}
-            <div>
-              <p className="text-base sm:text-lg font-extrabold text-slate-850 tracking-tight leading-none uppercase">
-                Ôn tập trắc nghiệm
+            <div className="flex flex-col justify-center">
+              <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider leading-tight">
+                CÔNG TY ĐIỆN LỰC AN GIANG
+              </p>
+              <p className="text-xs sm:text-sm font-extrabold text-indigo-950 uppercase tracking-wider leading-tight mt-0.5">
+                PHÒNG ĐIỀU ĐỘ
               </p>
             </div>
           </div>
