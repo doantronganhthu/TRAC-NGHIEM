@@ -179,13 +179,7 @@ export default function App() {
   const [nameSubmitted, setNameSubmitted] = useState<boolean>(false);
 
   // Redirection Gate State
-  const [gatewayUnlocked, setGatewayUnlocked] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('gateway_unlocked') === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const [gatewayUnlocked, setGatewayUnlocked] = useState<boolean>(true);
   const [gatewayCode, setGatewayCode] = useState<string>('');
 
   // Custom Exam States
