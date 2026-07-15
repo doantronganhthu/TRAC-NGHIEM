@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ExamQuestion, UserAnswers } from '../types';
-import { Award, RotateCcw, Check, X, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import { Award, RotateCcw, Check, X, ChevronDown, ChevronUp, AlertCircle, Printer, Info } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface QuizReviewProps {
@@ -9,6 +10,8 @@ interface QuizReviewProps {
   timeSpent: number; // in seconds
   onRestart: () => void;
   isDarkMode?: boolean;
+  studentName?: string;
+  examTitle?: string;
 }
 
 export const QuizReview: React.FC<QuizReviewProps> = ({
@@ -17,9 +20,17 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
   timeSpent,
   onRestart,
   isDarkMode = false,
+  studentName = 'Học viên',
+  examTitle = 'Bộ đề thi',
 }) => {
   const [filter, setFilter] = useState<'all' | 'correct' | 'incorrect'>('all');
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [showPrintConfirm, setShowPrintConfirm] = useState(false);
+
+  const today = new Date();
+  const day = String(today.getDate()).padStart(2, '0');
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const year = today.getFullYear();
 
   // Calculate results
   const total = questions.length;
@@ -81,14 +92,37 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
     }
   };
 
+  const handlePrintButtonClick = () => {
+    setShowPrintConfirm(true);
+  };
+
+  const executePrint = () => {
+    setShowPrintConfirm(false);
+    // Call window.print directly inside user event to satisfy browser heuristics
+    window.print();
+  };
+
   return (
-    <div id="quiz-review-container" className="space-y-8 w-full max-w-4xl mx-auto">
-      {/* Score Header Card */}
-      <div id="score-header-card" className={`border rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center gap-8 ${
-        isDarkMode 
-          ? 'bg-[#0f172a]/60 border-white/10 text-white backdrop-blur-xl shadow-2xl' 
-          : 'bg-white border-slate-100 text-slate-900 shadow-sm'
-      }`}>
+    <>
+      <div id="quiz-review-container" className="space-y-8 w-full max-w-4xl mx-auto">
+        {/* Score Header Card */}
+        <div id="score-header-card" className={`relative border rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center gap-8 ${
+          isDarkMode 
+            ? 'bg-[#0f172a]/60 border-white/10 text-white backdrop-blur-xl shadow-2xl' 
+            : 'bg-white border-slate-100 text-slate-900 shadow-sm'
+        }`}>
+          {/* Export PDF Button */}
+          <button
+            onClick={handlePrintButtonClick}
+            title="In kết quả / Xuất PDF"
+            className={`absolute top-4 right-4 p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              isDarkMode 
+                ? 'bg-white/5 hover:bg-white/15 border-white/10 hover:border-indigo-400 text-indigo-300' 
+                : 'bg-slate-50 hover:bg-indigo-50 border-slate-200 hover:border-indigo-300 text-indigo-600'
+            }`}
+          >
+            <Printer className="w-5 h-5" />
+          </button>
         
         {/* Progress Circle Visualizer */}
         <div id="score-meter-visual" className="flex-shrink-0 relative w-40 h-40 flex items-center justify-center">
@@ -370,5 +404,328 @@ export const QuizReview: React.FC<QuizReviewProps> = ({
         )}
       </div>
     </div>
+
+    {showPrintConfirm && (
+      <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md no-print">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className={`w-full max-w-sm p-6 rounded-2xl border shadow-2xl space-y-4 text-left ${
+            isDarkMode 
+              ? 'bg-slate-900 border-white/10 text-white' 
+              : 'bg-white border-slate-200 text-slate-900'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-indigo-500/10 text-indigo-400' : 'bg-indigo-50 text-indigo-600'}`}>
+              <Printer className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold">In kết quả bài thi</h3>
+              <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>Bạn có chắc chắn muốn in kết quả này?</p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-1">
+            <button
+              onClick={() => setShowPrintConfirm(false)}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
+                isDarkMode 
+                  ? 'bg-white/5 hover:bg-white/10 text-slate-300' 
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+              }`}
+            >
+              Hủy bỏ
+            </button>
+            <button
+              onClick={executePrint}
+              className="px-5 py-2 rounded-xl text-xs font-bold cursor-pointer bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white shadow-md shadow-indigo-500/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Xác nhận in
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    )}
+
+    {createPortal(
+      <div id="quiz-print-area" className="hidden print:block bg-white text-slate-900 p-8">
+        {/* Header matching user template */}
+        <div className="text-center pb-5 mb-6 space-y-2">
+          <h1 className="text-2xl font-extrabold text-slate-900 uppercase tracking-tight">
+            KẾT QUẢ KỲ THI
+          </h1>
+          <h2 className="text-lg font-bold text-slate-800">
+            {examTitle}
+          </h2>
+          <p className="text-xs text-slate-500 italic">
+            Ngày {day} tháng {month} năm {year}
+          </p>
+          <p className="text-sm text-slate-800 pt-1">
+            <span className="font-bold underline">Nhân viên:</span>{' '}
+            <span className="font-extrabold text-indigo-600 px-3 py-1 rounded-xl bg-indigo-50 border border-indigo-100 shadow-sm inline-block">
+              {studentName}
+            </span>
+          </p>
+        </div>
+
+        {/* Stats Card */}
+        <div className="border border-slate-200 rounded-3xl p-6 sm:p-8 flex flex-row items-center gap-8 bg-slate-50/50 mb-4 page-break-avoid">
+          {/* Circle Visualizer using static SVG */}
+          <div className="flex-shrink-0 relative w-24 h-24 flex items-center justify-center">
+            <svg className="w-full h-full transform -rotate-90">
+              <circle cx="48" cy="48" r="40" className="fill-none stroke-slate-200" strokeWidth="8" />
+              <circle
+                cx="48"
+                cy="48"
+                r="40"
+                className={`fill-none ${
+                  scorePercent >= 80 ? 'stroke-emerald-500' : scorePercent >= 50 ? 'stroke-indigo-500' : 'stroke-rose-500'
+                }`}
+                strokeWidth="8"
+                strokeDasharray="251.2"
+                strokeDashoffset={251.2 - (251.2 * scorePercent) / 100}
+              />
+            </svg>
+            <div className="absolute text-center">
+              <span className="text-xl font-extrabold font-mono text-slate-800">
+                {scorePercent}%
+              </span>
+              <p className="text-[8px] font-bold uppercase tracking-wider text-slate-500">Đạt</p>
+            </div>
+          </div>
+
+          {/* Score Text */}
+          <div className="flex-1 space-y-2">
+            <div className={`inline-block px-3 py-1 rounded-xl text-xs font-bold ${
+              scorePercent >= 80 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : scorePercent >= 50 ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' : 'bg-rose-100 text-rose-850 border border-rose-200'
+            }`}>
+              {feedbackTitle}
+            </div>
+            <h2 className="text-base font-bold text-slate-800">
+              Kết quả: {correctCount}/{total} câu đúng
+            </h2>
+            <p className="text-xs text-slate-600">
+              {feedbackDesc}
+            </p>
+
+            <div className="grid grid-cols-3 gap-3 pt-1">
+              <div className="p-2 rounded-xl text-center border bg-white border-slate-200">
+                <span className="block text-[9px] font-bold uppercase text-slate-500">Đúng</span>
+                <span className="text-xs font-bold font-mono mt-0.5 inline-block text-emerald-600">{correctCount}</span>
+              </div>
+              <div className="p-2 rounded-xl text-center border bg-white border-slate-200">
+                <span className="block text-[9px] font-bold uppercase text-slate-500">Sai / Bỏ qua</span>
+                <span className="text-xs font-bold font-mono mt-0.5 inline-block text-rose-600">{incorrectCount + skippedCount}</span>
+              </div>
+              <div className="p-2 rounded-xl text-center border bg-white border-slate-200">
+                <span className="block text-[9px] font-bold uppercase text-slate-500">Thời gian</span>
+                <span className="text-xs font-bold font-mono mt-0.5 inline-block text-slate-700">{formatTime(timeSpent)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Custom requested gap to fill vertical portrait A4 page perfectly with exactly 1 question */}
+        <div className="h-36 no-print-height" />
+
+        {/* List of Questions */}
+        <div className="space-y-6">
+          <h3 className="text-base font-extrabold text-slate-900 border-b-2 border-slate-900 pb-1 mb-6 uppercase inline-block">
+            <u>DANH SÁCH CÂU HỎI ĐÃ LÀM:</u>
+          </h3>
+
+          {/* FIRST QUESTION (Always on page 1) */}
+          {questions.length > 0 && (() => {
+            const q = questions[0];
+            const selectedAns = userAnswers[0];
+            const isCorrect = selectedAns === q.answer;
+            const isSkipped = selectedAns === null || selectedAns === undefined;
+
+            return (
+              <div className="border border-slate-200 rounded-2xl overflow-hidden page-break-avoid bg-white">
+                <div className="p-4 sm:p-5 flex items-start gap-4 bg-slate-50/30">
+                  <div className="mt-0.5 flex-shrink-0">
+                    {isCorrect ? (
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                        ✓
+                      </div>
+                    ) : isSkipped ? (
+                      <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs">
+                        ?
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs">
+                        ✗
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold font-mono text-slate-400">CÂU 1</span>
+                      {isSkipped && (
+                        <span className="px-2 py-0.5 text-[9px] font-bold rounded bg-slate-100 text-slate-600">
+                          Chưa trả lời
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs sm:text-sm font-bold text-slate-800 leading-relaxed">
+                      {q.question}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-100 bg-white p-4 sm:p-5 space-y-2.5">
+                  {q.shuffledOptions.map((opt, oIdx) => {
+                    const isOptSelected = selectedAns === opt.originalKey;
+                    const isOptCorrect = opt.originalKey === q.answer;
+
+                    let optClass = "p-3 text-xs rounded-xl border flex items-start gap-3 bg-white border-slate-200 text-slate-800";
+                    if (isOptCorrect) {
+                      optClass = "p-3 text-xs rounded-xl border flex items-start gap-3 bg-emerald-50 border-emerald-300 text-emerald-900";
+                    } else if (isOptSelected) {
+                      optClass = "p-3 text-xs rounded-xl border flex items-start gap-3 bg-rose-50 border-rose-300 text-rose-900";
+                    }
+
+                    const letter = String.fromCharCode(65 + oIdx);
+
+                    return (
+                      <div key={oIdx} className={optClass}>
+                        <span className={`w-5 h-5 rounded flex items-center justify-center font-bold text-xs flex-shrink-0 ${
+                          isOptCorrect
+                            ? 'bg-emerald-500 text-white'
+                            : isOptSelected
+                            ? 'bg-rose-500 text-white'
+                            : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {letter}
+                        </span>
+                        <div className="flex-1">
+                          <p className="leading-normal font-medium">{opt.text}</p>
+                          {isOptCorrect && (
+                            <span className="inline-block mt-1 text-[9px] font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">
+                              Đáp án đúng
+                            </span>
+                          )}
+                          {isOptSelected && !isOptCorrect && (
+                            <span className="inline-block mt-1 text-[9px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.5 rounded">
+                              Lựa chọn của bạn
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* REMAINING QUESTIONS (Pushed to page 2 and onwards) */}
+          {questions.length > 1 && (
+            <>
+              {/* Force clean page break after page 1's question */}
+              <div style={{ pageBreakBefore: 'always', breakBefore: 'page' }} />
+
+              <div className="space-y-6 pt-4">
+                {questions.slice(1).map((q, idx) => {
+                  const qIdx = idx + 1;
+                  const selectedAns = userAnswers[qIdx];
+                  const isCorrect = selectedAns === q.answer;
+                  const isSkipped = selectedAns === null || selectedAns === undefined;
+
+                  return (
+                    <div
+                      key={q.id}
+                      className="border border-slate-200 rounded-2xl overflow-hidden page-break-avoid bg-white"
+                    >
+                      <div className="p-4 sm:p-5 flex items-start gap-4 bg-slate-50/30">
+                        <div className="mt-0.5 flex-shrink-0">
+                          {isCorrect ? (
+                            <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                              ✓
+                            </div>
+                          ) : isSkipped ? (
+                            <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs">
+                              ?
+                            </div>
+                          ) : (
+                            <div className="w-6 h-6 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs">
+                              ✗
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex-1 space-y-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold font-mono text-slate-400">CÂU {qIdx + 1}</span>
+                            {isSkipped && (
+                              <span className="px-2 py-0.5 text-[9px] font-bold rounded bg-slate-100 text-slate-600">
+                                Chưa trả lời
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs sm:text-sm font-bold text-slate-800 leading-relaxed">
+                            {q.question}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Options */}
+                      <div className="border-t border-slate-100 bg-white p-4 sm:p-5 space-y-2.5">
+                        {q.shuffledOptions.map((opt, oIdx) => {
+                          const isOptSelected = selectedAns === opt.originalKey;
+                          const isOptCorrect = opt.originalKey === q.answer;
+
+                          let optClass = "p-3 text-xs rounded-xl border flex items-start gap-3 bg-white border-slate-200 text-slate-800";
+                          if (isOptCorrect) {
+                            optClass = "p-3 text-xs rounded-xl border flex items-start gap-3 bg-emerald-50 border-emerald-300 text-emerald-900";
+                          } else if (isOptSelected) {
+                            optClass = "p-3 text-xs rounded-xl border flex items-start gap-3 bg-rose-50 border-rose-300 text-rose-900";
+                          }
+
+                          const letter = String.fromCharCode(65 + oIdx);
+
+                          return (
+                            <div key={oIdx} className={optClass}>
+                              <span className={`w-5 h-5 rounded flex items-center justify-center font-bold text-xs flex-shrink-0 ${
+                                isOptCorrect
+                                  ? 'bg-emerald-500 text-white'
+                                  : isOptSelected
+                                  ? 'bg-rose-500 text-white'
+                                  : 'bg-slate-100 text-slate-500'
+                              }`}>
+                                {letter}
+                              </span>
+                              <div className="flex-1">
+                                <p className="leading-normal font-medium">{opt.text}</p>
+                                {isOptCorrect && (
+                                  <span className="inline-block mt-1 text-[9px] font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">
+                                    Đáp án đúng
+                                  </span>
+                                )}
+                                {isOptSelected && !isOptCorrect && (
+                                  <span className="inline-block mt-1 text-[9px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.5 rounded">
+                                    Lựa chọn của bạn
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      </div>,
+      document.body
+    )}
+
+    </>
   );
 };

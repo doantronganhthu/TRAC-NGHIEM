@@ -45,3 +45,39 @@
   );
   animation: shiny-glow 2s infinite linear;
 }
+
+@media print {
+  /* Hide every top-level child of body EXCEPT the dedicated print area */
+  body > :not(#quiz-print-area) {
+    display: none !important;
+  }
+
+  /* Display the print area as the single clean document source */
+  #quiz-print-area {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    background-color: white !important;
+    color: #0f172a !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Force browsers to print original colors and backgrounds (for status badges) */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Prevent question cards or stats elements from being cut across page boundaries */
+  .page-break-avoid {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
+

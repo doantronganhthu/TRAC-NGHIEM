@@ -35,7 +35,8 @@ import {
   GripVertical,
   Download,
   Sun,
-  Moon
+  Moon,
+  ExternalLink
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -176,6 +177,16 @@ export default function App() {
   const [userName, setUserName] = useState<string>('');
   const [tempName, setTempName] = useState<string>('');
   const [nameSubmitted, setNameSubmitted] = useState<boolean>(false);
+
+  // Redirection Gate State
+  const [gatewayUnlocked, setGatewayUnlocked] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('gateway_unlocked') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [gatewayCode, setGatewayCode] = useState<string>('');
 
   // Custom Exam States
   const [exams, setExams] = useState<any[]>(() => {
@@ -1194,15 +1205,84 @@ export default function App() {
           
           {/* Phase 1: Welcome & Intro configuration panel */}
           {phase === 'intro' && (
-            <div className={`w-full flex flex-col items-center ${!nameSubmitted ? 'pt-4 sm:pt-6 md:pt-8 lg:pt-12 pb-6 gap-6' : 'gap-8'}`}>
-              <motion.div
-                key="intro-screen"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                id="intro-container"
-                className={`max-w-3xl mx-auto w-full ${!nameSubmitted ? 'space-y-6' : 'space-y-8'}`}
-              >
+            <div className={`w-full flex flex-col items-center ${!nameSubmitted && gatewayUnlocked ? 'pt-4 sm:pt-6 md:pt-8 lg:pt-12 pb-6 gap-6' : 'gap-8'}`}>
+              {!gatewayUnlocked ? (
+                /* Redirection Interstitial Gate */
+                <motion.div
+                  key="gateway-screen"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  id="gateway-container"
+                  className={`relative max-w-xl mx-auto w-full rounded-3xl p-8 sm:p-12 text-center transition-all duration-300 ${
+                    isDarkMode 
+                      ? 'bg-[#0f172a]/65 border border-white/10 backdrop-blur-xl shadow-2xl' 
+                      : 'bg-white shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100'
+                  } my-auto min-h-[300px] flex flex-col items-center justify-center`}
+                >
+                  {/* Top-right subtle capsule input */}
+                  <div className="absolute top-4 right-4">
+                    <input
+                      type="text"
+                      value={gatewayCode}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setGatewayCode(val);
+                        if (val === '9630anh') {
+                          setGatewayUnlocked(true);
+                          try {
+                            localStorage.setItem('gateway_unlocked', 'true');
+                          } catch (err) {}
+                        }
+                      }}
+                      className={`w-24 h-7 text-center font-mono text-xs rounded-full border outline-none transition-all ${
+                        isDarkMode 
+                          ? 'bg-white/5 border-white/10 text-white focus:border-indigo-500/80 focus:ring-2 focus:ring-indigo-500/20' 
+                          : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100'
+                      }`}
+                      style={{ borderRadius: '9999px' }}
+                    />
+                  </div>
+
+                  {/* Icon / Interstitial Header */}
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-6 transition-colors duration-300 ${
+                    isDarkMode ? 'bg-indigo-500/10 text-indigo-400' : 'bg-indigo-50 text-indigo-600'
+                  }`}>
+                    <ExternalLink className="w-6 h-6 animate-pulse" />
+                  </div>
+
+                  <h2 className={`text-lg sm:text-xl font-extrabold tracking-tight mb-4 transition-colors duration-300 ${
+                    isDarkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    Thông Báo Di Chuyển Trang Web
+                  </h2>
+
+                  <p className={`text-sm sm:text-base leading-relaxed mb-6 transition-colors duration-300 ${
+                    isDarkMode ? 'text-slate-300' : 'text-slate-600'
+                  }`}>
+                    Trang web đã được chuyển sang link mới --&gt;{' '}
+                    <a
+                      href="https://tracnghiem-dta.vercel.app/"
+                      className="inline-block font-extrabold text-indigo-500 hover:text-indigo-400 underline transition-all duration-200 hover:scale-[1.01] break-all"
+                    >
+                      https://tracnghiem-dta.vercel.app/
+                    </a>
+                  </p>
+
+                  <p className="text-xs text-slate-400 font-medium leading-normal max-w-sm">
+                    Vui lòng nhấn vào liên kết phía trên để tự động chuyển hướng đến hệ thống mới.
+                  </p>
+                </motion.div>
+              ) : (
+                <>
+                  <motion.div
+                    key="intro-screen"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    id="intro-container"
+                    className={`max-w-3xl mx-auto w-full ${!nameSubmitted ? 'space-y-6' : 'space-y-8'}`}
+                  >
               {/* Premium Title Section */}
               <div className="text-center space-y-2 py-2 px-2">
                 <span className={`text-base min-[380px]:text-lg sm:text-xl font-extrabold uppercase tracking-widest block leading-normal transition-colors duration-300 ${
@@ -1911,8 +1991,10 @@ export default function App() {
                 )}
               </motion.div>
             )}
-          </div>
+          </>
         )}
+      </div>
+    )}
 
           {/* Phase 2: Active testing experience */}
           {phase === 'quiz' && (
@@ -2119,6 +2201,8 @@ export default function App() {
                 timeSpent={timeSpent}
                 onRestart={() => setPhase('intro')}
                 isDarkMode={isDarkMode}
+                studentName={userName || 'Học viên'}
+                examTitle={activeExam?.title || 'Bộ đề thi'}
               />
             </motion.div>
           )}
