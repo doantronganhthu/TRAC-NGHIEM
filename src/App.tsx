@@ -3,7 +3,7 @@ import { QUESTION_BANK } from './questions';
 import { Question, ExamQuestion, QuizMode, UserAnswers } from './types';
 import { QuizCard } from './components/QuizCard';
 import { db } from './firebase';
-import { collection, doc, setDoc, getDocs, onSnapshot, query, orderBy, writeBatch, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, onSnapshot, query, orderBy, writeBatch, serverTimestamp, deleteDoc, runTransaction } from 'firebase/firestore';
 import { QuizReview } from './components/QuizReview';
 import logoImg from './Logo.png';
 import logo2Img from './Logo2.png';
@@ -254,29 +254,52 @@ export default function App() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Visitor Counter State
-  const [visitorCount, setVisitorCount] = useState<number>(() => {
-    try {
-      const stored = localStorage.getItem('visitor_count');
-      if (stored) {
-        const count = parseInt(stored, 10);
-        if (!isNaN(count)) return count;
-      }
-    } catch (e) {}
-    return 940;
-  });
+  const [visitorCount, setVisitorCount] = useState<number>(940);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('visitor_count');
-      let newCount = 940;
-      if (stored) {
-        newCount = parseInt(stored, 10) + 1;
-      } else {
-        newCount = Math.floor(Math.random() * 20) + 940;
+    const fetchAndIncrementCounter = async () => {
+      try {
+        const counterRef = doc(db, 'settings', 'visitor_counter');
+        await runTransaction(db, async (transaction) => {
+          const sfDoc = await transaction.get(counterRef);
+          let currentCount = 940;
+          
+          if (sfDoc.exists()) {
+            currentCount = sfDoc.data().count || 940;
+            const newCount = currentCount + 1;
+            transaction.update(counterRef, { count: newCount });
+            setVisitorCount(newCount);
+          } else {
+            // First time migrating from localStorage to Firebase
+            try {
+              const stored = localStorage.getItem('visitor_count');
+              if (stored) {
+                const parsed = parseInt(stored, 10);
+                if (!isNaN(parsed) && parsed > currentCount) {
+                  currentCount = parsed;
+                }
+              }
+            } catch (e) {}
+            
+            const newCount = currentCount + 1;
+            transaction.set(counterRef, { count: newCount });
+            setVisitorCount(newCount);
+          }
+        });
+      } catch (error) {
+        console.error("Error updating visitor count in Firestore:", error);
+        // Fallback to reading setting directly or default
+        try {
+          const stored = localStorage.getItem('visitor_count');
+          if (stored) {
+            const count = parseInt(stored, 10);
+            if (!isNaN(count)) setVisitorCount(count + 1);
+          }
+        } catch (e) {}
       }
-      localStorage.setItem('visitor_count', String(newCount));
-      setVisitorCount(newCount);
-    } catch (e) {}
+    };
+
+    fetchAndIncrementCounter();
   }, []);
 
   // Set page title once

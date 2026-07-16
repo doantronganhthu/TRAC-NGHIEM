@@ -76,6 +76,18 @@
         }
       },
       "required": ["order"]
+    },
+    "VisitorCounter": {
+      "title": "VisitorCounter",
+      "description": "Số lượt truy cập trang web",
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Số lượt truy cập tích lũy"
+        }
+      },
+      "required": ["count"]
     }
   },
   "firestore": {
@@ -87,9 +99,13 @@
       "schema": "Exam",
       "description": "Tập hợp các kỳ thi"
     },
-    "settings/{settingId}": {
+    "settings/exam_order": {
       "schema": "Settings",
-      "description": "Các cài đặt hoặc thiết lập cấu hình của ứng dụng như thứ tự kỳ thi"
+      "description": "Thứ tự sắp xếp các kỳ thi"
+    },
+    "settings/visitor_counter": {
+      "schema": "VisitorCounter",
+      "description": "Số lượt truy cập tích lũy của trang web"
     }
   }
 }
