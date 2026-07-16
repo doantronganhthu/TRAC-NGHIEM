@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef, ChangeEvent } from 'react';
 import { QUESTION_BANK } from './questions';
 import { Question, ExamQuestion, QuizMode, UserAnswers } from './types';
+import { IS_GATEWAY_ENABLED } from './gateway-config';
 import { QuizCard } from './components/QuizCard';
 import { db } from './firebase';
-import { collection, doc, setDoc, getDocs, onSnapshot, query, orderBy, writeBatch, serverTimestamp, deleteDoc, runTransaction } from 'firebase/firestore';
+import { collection, doc, setDoc, getDoc, getDocs, onSnapshot, query, orderBy, writeBatch, serverTimestamp, deleteDoc, increment } from 'firebase/firestore';
 import { QuizReview } from './components/QuizReview';
 import logoImg from './Logo.png';
 import logo2Img from './Logo2.png';
@@ -179,7 +180,16 @@ export default function App() {
   const [nameSubmitted, setNameSubmitted] = useState<boolean>(false);
 
   // Redirection Gate State
-  const [gatewayUnlocked, setGatewayUnlocked] = useState<boolean>(true);
+  const [gatewayUnlocked, setGatewayUnlocked] = useState<boolean>(() => {
+    if (!IS_GATEWAY_ENABLED) {
+      return true;
+    }
+    try {
+      return localStorage.getItem('gateway_unlocked') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [gatewayCode, setGatewayCode] = useState<string>('');
 
   // Custom Exam States
@@ -254,38 +264,41 @@ export default function App() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Visitor Counter State
-  const [visitorCount, setVisitorCount] = useState<number>(940);
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+  const hasIncrementedRef = useRef<boolean>(false);
 
   useEffect(() => {
+    if (hasIncrementedRef.current) return;
+    hasIncrementedRef.current = true;
+
     const fetchAndIncrementCounter = async () => {
       try {
         const counterRef = doc(db, 'settings', 'visitor_counter');
-        await runTransaction(db, async (transaction) => {
-          const sfDoc = await transaction.get(counterRef);
-          let currentCount = 940;
-          
-          if (sfDoc.exists()) {
-            currentCount = sfDoc.data().count || 940;
-            const newCount = currentCount + 1;
-            transaction.update(counterRef, { count: newCount });
-            setVisitorCount(newCount);
-          } else {
-            // First time migrating from localStorage to Firebase
-            try {
-              const stored = localStorage.getItem('visitor_count');
-              if (stored) {
-                const parsed = parseInt(stored, 10);
-                if (!isNaN(parsed) && parsed > currentCount) {
-                  currentCount = parsed;
-                }
-              }
-            } catch (e) {}
-            
-            const newCount = currentCount + 1;
-            transaction.set(counterRef, { count: newCount });
-            setVisitorCount(newCount);
+        const sfDocCheck = await getDoc(counterRef);
+        
+        if (sfDocCheck.exists()) {
+          // Atomically increment the count
+          await setDoc(counterRef, { count: increment(1) }, { merge: true });
+          // Fetch the fresh updated count
+          const sfDocFresh = await getDoc(counterRef);
+          if (sfDocFresh.exists()) {
+            setVisitorCount(sfDocFresh.data().count || 1003);
           }
-        });
+        } else {
+          // Document does not exist, initialize it with a starting count
+          let initialCount = 1003; // Seed starting from the current error's latest number to continue seamlessly
+          try {
+            const stored = localStorage.getItem('visitor_count');
+            if (stored) {
+              const parsed = parseInt(stored, 10);
+              if (!isNaN(parsed) && parsed > initialCount) {
+                initialCount = parsed;
+              }
+            }
+          } catch (e) {}
+          await setDoc(counterRef, { count: initialCount + 1 });
+          setVisitorCount(initialCount + 1);
+        }
       } catch (error) {
         console.error("Error updating visitor count in Firestore:", error);
         // Fallback to reading setting directly or default
@@ -293,9 +306,13 @@ export default function App() {
           const stored = localStorage.getItem('visitor_count');
           if (stored) {
             const count = parseInt(stored, 10);
-            if (!isNaN(count)) setVisitorCount(count + 1);
+            if (!isNaN(count)) {
+              setVisitorCount(count + 1);
+              return;
+            }
           }
         } catch (e) {}
+        setVisitorCount(1003);
       }
     };
 
@@ -2417,9 +2434,13 @@ D: Lựa chọn D
         }`}
       >
         <Eye className={`text-slate-600 ${phase === 'quiz' ? 'w-4 h-4' : 'w-5 h-5'}`} />
-        <span className={`font-semibold font-mono text-slate-800 ${phase === 'quiz' ? 'text-xs' : 'text-sm'}`}>
-          {visitorCount}
-        </span>
+        {visitorCount === null ? (
+          <div className={`animate-spin rounded-full border-2 border-slate-300 border-t-indigo-600 ${phase === 'quiz' ? 'w-3 h-3' : 'w-4 h-4'}`} />
+        ) : (
+          <span className={`font-semibold font-mono text-slate-800 ${phase === 'quiz' ? 'text-xs' : 'text-sm'}`}>
+            {visitorCount}
+          </span>
+        )}
       </div>
 
       {/* Dev Sticky Badge Capsule */}
