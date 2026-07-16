@@ -253,6 +253,32 @@ export default function App() {
   const [timeSpent, setTimeSpent] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Visitor Counter State
+  const [visitorCount, setVisitorCount] = useState<number>(() => {
+    try {
+      const stored = localStorage.getItem('visitor_count');
+      if (stored) {
+        const count = parseInt(stored, 10);
+        if (!isNaN(count)) return count;
+      }
+    } catch (e) {}
+    return 940;
+  });
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('visitor_count');
+      let newCount = 940;
+      if (stored) {
+        newCount = parseInt(stored, 10) + 1;
+      } else {
+        newCount = Math.floor(Math.random() * 20) + 940;
+      }
+      localStorage.setItem('visitor_count', String(newCount));
+      setVisitorCount(newCount);
+    } catch (e) {}
+  }, []);
+
   // Set page title once
   useEffect(() => {
     document.title = "Trắc Nghiệm Quy Trình Hệ Thống Điện";
@@ -2359,13 +2385,27 @@ D: Lựa chọn D
       <footer id="app-global-footer" className="text-center text-xs text-slate-400 font-medium">
       </footer>
 
+      {/* Visitor Counter Capsule */}
+      <div 
+        className={`fixed z-50 flex items-center select-none bg-white/95 backdrop-blur-md border border-slate-200/90 text-slate-600 hover:bg-white transition-all duration-300 cursor-pointer active:scale-95 ${
+          phase === 'quiz'
+            ? 'bottom-1 left-1 px-2.5 py-0.5 rounded-lg gap-1.5 scale-90 opacity-60 hover:opacity-100 hover:scale-95 shadow-md'
+            : 'bottom-4 left-4 px-3 py-1.5 rounded-full gap-2 shadow-lg scale-[0.75] hover:scale-[0.80] origin-bottom-left'
+        }`}
+      >
+        <Eye className={`text-slate-600 ${phase === 'quiz' ? 'w-4 h-4' : 'w-5 h-5'}`} />
+        <span className={`font-semibold font-mono text-slate-800 ${phase === 'quiz' ? 'text-xs' : 'text-sm'}`}>
+          {visitorCount}
+        </span>
+      </div>
+
       {/* Dev Sticky Badge Capsule */}
       <div 
         onClick={() => setShowLogoModal(true)}
-        className={`fixed z-50 flex items-center select-none bg-white/95 backdrop-blur-md border border-slate-200/90 text-slate-600 hover:scale-105 hover:bg-white transition-all duration-300 cursor-pointer active:scale-95 ${
+        className={`fixed z-50 flex items-center select-none bg-white/95 backdrop-blur-md border border-slate-200/90 text-slate-600 hover:bg-white transition-all duration-300 cursor-pointer active:scale-95 ${
           phase === 'quiz'
             ? 'bottom-1 right-1 px-2 py-0.5 rounded-lg gap-1 scale-90 opacity-60 hover:opacity-100 hover:scale-95 shadow-md'
-            : 'bottom-4 right-4 px-3 py-1.5 rounded-full gap-2 shadow-lg'
+            : 'bottom-4 right-4 px-3 py-1.5 rounded-full gap-2 shadow-lg scale-[0.75] hover:scale-[0.80] origin-bottom-right'
         }`}
       >
         {phase !== 'quiz' && (
